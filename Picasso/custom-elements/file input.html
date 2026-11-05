@@ -1,0 +1,74 @@
+<div class="file">
+  <input prop="backgroundImage" onchange="uploadThatFile(this)" type="file" id="upload-file-for-css-editor"/>
+  <button onclick="returnClick(this);" class="SelectFile-Btn">Select File</button>
+  <button prop="backgroundImage" onclick="removeBG(this)" class="RemoveFile-Btn">
+    <p>&times;</p>
+  </button>
+  <p id="filename">no file is selected</p>
+</div>
+<style>
+  .file {
+    color: #E6E1DC;
+    background-color: #202020;
+    -webkit-box-shadow: inset 0 0 10px black;
+    -moz-box-shadow: inset 0 0 10px black;
+    box-shadow: inset 0 0 10px black;
+    background-image: url(dottedBG.png);
+    border-radius: 50px;
+    height: 70px;
+    width: 350px;
+    position: relative;
+    transition: 400ms;
+    align-content: center;
+    align-items: center;
+    display: flex;
+  }
+  .file .SelectFile-Btn {
+    background: linear-gradient(gold, orange,gold);
+    border: none;
+    text-align: center;
+    margin-left: 10px;
+    height: 35px;
+    width: 95px;
+    border-radius: 50px;
+  }
+  .file .RemoveFile-Btn {
+    background: linear-gradient(gold, orange,gold);
+    border: none;
+    margin-left: 10px;
+    height: 25px;
+    width: 25px;
+    border-radius: 50px;
+    display: flex;
+    justify-content: center;
+    justify-items: center;
+    align-items: center;
+    align-content: center;
+  }
+  .file .RemoveFile-Btn p {
+    color: #000000;
+  }
+  .file #filename {
+    margin-left: 15px;
+    font-size: 10px;
+    background: linear-gradient(gold, orange,gold);
+    background-clip: text;
+    color: rgba(0,0,0,0);
+  }
+  .file input[type="file"] {
+    display: none;
+  }
+</style>
+<script>
+  function uploadThatFile(element) {
+  document.body.style[element.getAttribute("prop")] = `url(${window.URL.createObjectURL(element.files[0])})`;
+    element.parentElement.querySelector("#filename").innerText=element.files[0].name;
+  }
+  function returnClick(element) {
+    element.parentElement.querySelector(`input[type="file"]`).click();
+  }
+  function removeBG(element) {
+    document.body.style.removeProperty("background-image");
+    element.parentElement.querySelector("#filename").innerText="no file is selected";
+  }
+</script>

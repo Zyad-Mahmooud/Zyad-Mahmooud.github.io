@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PerformanceObserver - All Paint Events</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #1a1a2e;
+            color: #fff;
+        }
+
+        .box {
+            width: 300px;
+            height: 300px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            margin: 20px auto;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            elementtiming: "main-box";
+        }
+
+        button {
+            padding: 12px 24px;
+            margin: 5px;
+            background: #00d4ff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .box:active {
+          background: blue;
+          width: 5px!important;
+        }
+        .btn {
+          --import: '{"from": { "selector": ".box", "prop": "background" },"to": { "selector": ".btn", "prop": "background" }}';
+        }
+    </style>
+</head>
+<body>
+    
+
+    <div class="box" id="box">
+      <button class="btn">btn</button>
+    </div>
+    <button onclick="change()">تغيير</button>
+<h1 style="text-align: center;">⚡ PerformanceObserver</h1>
+    <script src="Paint.js" type="text/javascript" charset="utf-8"></script>
+    <script defer>
+    var po = new PerformanceObserver(function (){
+      alert("layout-shift dected");
+    });
+    po.observe({
+      type: "layout-shift",
+      buffered: true
+    });
+    </script>
+    <script>
+      var imports = Paint.findRule({
+        prop: "--import",
+        sheet: document.querySelector("style").sheet
+      });
+      imports.forEach((rule)=>{
+        var code = JSON.parse(rule.ref.style.getPropertyValue("--import").replaceAll("'",""));
+        var target = Paint.getCSSObj(code.from.selector)[code.from.prop];
+        var exportTo = Paint.getCSSObj(code.to.selector);
+        exportTo[code.to.prop] = target;
+        console.log(exportTo[code.to.prop] == target);
+      });
+    </script>
+</body>
+</html>

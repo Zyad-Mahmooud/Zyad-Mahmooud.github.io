@@ -1,0 +1,79 @@
+<style>
+  .svg-gradient {
+    --Gradient: linear-gradient(135deg, rgb(102, 126, 234) 0%, rgb(118, 75, 162) 100%);
+  }
+</style>
+
+<svg class="svg-gradient" xmlns="http://www.w3.org/2000/svg" viewBox="-5 -10 110 135" width="400" height="400">
+  <defs></defs>
+  <path d="m54.727 62.266-15.703 10.469c-0.19531 4.4375-1.8438 8.1719-4.9609 11.078-5.7344 5.3516-15.375 6.7031-21.133 6.7031-0.77344 0-1.4844-0.023437-2.1016-0.070313-0.5-0.03125-0.95312-0.30469-1.2188-0.73437-0.26562-0.42188-0.3125-0.95313-0.125-1.4141 0.42969-1.0469 0.70312-3 1.0312-5.2578 1.1641-8.1016 3.1016-21.539 16.75-22.086l10.469-15.68zm33.875-50.867c-2.3438-2.3438-6.0703-2.5625-8.6719-0.51563l-37.945 29.812 17.32 17.32 29.812-37.945c2.0547-2.6094 1.8281-6.3359-0.51563-8.6719z"/>
+</svg>
+
+<script src="Paint.js"></script>
+<script src="http://localhost:8158/Gradient%20Parser/build/web.js"></script>
+<script>
+function createSVGStop(color, offset) {
+  const stop = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+  stop.setAttribute("offset", offset || "0%");
+  stop.setAttribute("stop-color", color);
+  stop.setAttribute("stop-opacity", "1");
+  return stop;
+}
+
+// تحويل زاوية CSS إلى x1,y1,x2,y2 في SVG
+function cssAngleToXY(deg) {
+  const rad = (90 - deg) * Math.PI / 180; // تصحيح زاوية CSS إلى نظام SVG
+  return {
+    x1: 0.5 - 0.5 * Math.cos(rad),
+    y1: 0.5 - 0.5 * Math.sin(rad),
+    x2: 0.5 + 0.5 * Math.cos(rad),
+    y2: 0.5 + 0.5 * Math.sin(rad)
+  };
+}
+
+const result = Paint.findRule({
+  sheet: document.querySelector("style").sheet,
+  prop: "--Gradient"
+});
+
+result.forEach(rule => {
+  const G = rule.ref.style.getPropertyValue("--Gradient");
+  if (!G) return;
+
+  const Data = GradientParser.parse(G)[0];
+  const svg = document.querySelector("svg.svg-gradient");
+  const defs = svg.querySelector("defs");
+
+  // إنشاء linearGradient داخل namespace
+  const linear = document.createElementNS("http://www.w3.org/2000/svg", "linearGradient");
+  linear.id = "grad" + Math.floor(Math.random() * 10000);
+
+  // حساب الإحداثيات من الزاوية
+  if (Data.orientation.type === "angular") {
+    const xy = cssAngleToXY(Data.orientation.value);
+    linear.setAttribute("x1", xy.x1);
+    linear.setAttribute("y1", xy.y1);
+    linear.setAttribute("x2", xy.x2);
+    linear.setAttribute("y2", xy.y2);
+  } else {
+    linear.setAttribute("x1", "0%");
+    linear.setAttribute("y1", "0%");
+    linear.setAttribute("x2", "100%");
+    linear.setAttribute("y2", "0%");
+  }
+
+  // إضافة الـstops
+  Data.colorStops.forEach(c => {
+    let color, offset;
+    if (c.type === "hex") color = `#${c.value}`;
+    else color = `${c.type}(${c.value.toString()})`;
+    offset = c.length && c.length.value && c.length.type ? `${c.length.value}${c.length.type}` : "0%";
+    linear.appendChild(createSVGStop(color, offset));
+  });
+
+  defs.appendChild(linear);
+
+  // تطبيق fill على path
+  svg.querySelector("path").setAttribute("fill", `url(#${linear.id})`);
+});
+</script>

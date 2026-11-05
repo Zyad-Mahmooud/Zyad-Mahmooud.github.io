@@ -1,0 +1,384 @@
+/* --- PICASSO SOFT UI DESIGN SYSTEM (OPTIMIZED) --- */
+
+/* =========================================
+   1. SOFT BUTTONS & INTERACTIONS
+   ========================================= */
+
+/* قائمة المحددات المشتركة للأزرار */
+.pi-button-default,
+.pi-button-submit-default,
+.pi-submit-button-default,
+.pi-button-primary,
+.pi-button-secondary,
+.pi-button-accent,
+.pi-button-info,
+.pi-button-success,
+.pi-button-warning,
+.pi-button-error,
+.pi-input-reset-default {
+  appearance: none;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+  box-shadow: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* الخصائص الأساسية للأزرار العامة */
+.pi-button-default,
+.pi-button-submit-default,
+.pi-submit-button-default,
+.pi-button-primary,
+.pi-button-secondary,
+.pi-button-accent,
+.pi-button-info,
+.pi-button-success,
+.pi-button-warning,
+.pi-button-error {
+  font-size: 1.1rem;
+  line-height: 1.2;
+  padding: 18px 28px;
+  min-height: 64px;
+}
+
+/* تخصيص زر الـ Reset منفصلاً لعدم التضارب */
+.pi-input-reset-default {
+  padding: 12px 24px;
+}
+
+/* --- الألوان الفردية للأزرار --- */
+.pi-button-default, .pi-button-submit-default, .pi-submit-button-default { background-color: #eaeaea; color: #202020; border-color: #e2e2e2; }
+.pi-button-primary   { background-color: #eef0ff; color: #5135b5; border-color: #e9ebfc; }
+.pi-button-secondary { background-color: #fff0f7; color: #df2e8b; border-color: #ffedf5; }
+.pi-button-accent    { background-color: #edfbfa; color: #08bda9; border-color: #e7f8f6; }
+.pi-button-info      { background-color: #edfaff; color: #08afd0; border-color: #e5f6fb; }
+.pi-button-success   { background-color: #ecfbf5; color: #08bd94; border-color: #e4f8ef; }
+.pi-button-warning   { background-color: #fffaed; color: #e9a900; border-color: #fff7e5; }
+.pi-button-error, .pi-input-reset-default { background-color: #fff1f2; color: #e76580; border-color: #ffebed; }
+
+/* --- تأثيرات التمرير (Hover الألوان) --- */
+.pi-button-default:hover, .pi-button-submit-default:hover, .pi-submit-button-default:hover { background-color: #e2e2e2; }
+.pi-button-primary:hover   { background-color: #e4e7ff; }
+.pi-button-secondary:hover { background-color: #ffe5f1; }
+.pi-button-accent:hover    { background-color: #ddf7f4; }
+.pi-button-info:hover      { background-color: #dff5fc; }
+.pi-button-success:hover   { background-color: #dcf7eb; }
+.pi-button-warning:hover   { background-color: #fff4d8; }
+.pi-button-error:hover, .pi-input-reset-default:hover { background-color: #ffe5e8; }
+
+/* --- التأثيرات الحركية العامة للـ Hover, Active, Focus (بدون تكرار مفرط) --- */
+.pi-button-default:hover, .pi-button-submit-default:hover, .pi-submit-button-default:hover,
+.pi-button-primary:hover, .pi-button-secondary:hover, .pi-button-accent:hover,
+.pi-button-info:hover, .pi-button-success:hover, .pi-button-warning:hover,
+.pi-button-error:hover, .pi-input-reset-default:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 14px rgb(0 0 0 / 5%);
+}
+
+.pi-button-default:active, .pi-button-submit-default:active, .pi-submit-button-default:active,
+.pi-button-primary:active, .pi-button-secondary:active, .pi-button-accent:active,
+.pi-button-info:active, .pi-button-success:active, .pi-button-warning:active,
+.pi-button-error:active, .pi-input-reset-default:active {
+  transform: scale(.98);
+  box-shadow: none;
+}
+
+.pi-button-default:focus-visible, .pi-button-submit-default:focus-visible, .pi-submit-button-default:focus-visible,
+.pi-button-primary:focus-visible, .pi-button-secondary:focus-visible, .pi-button-accent:focus-visible,
+.pi-button-info:focus-visible, .pi-button-success:focus-visible, .pi-button-warning:focus-visible,
+.pi-button-error:focus-visible, .pi-input-reset-default:focus-visible {
+  outline: 3px solid currentColor;
+  outline-offset: 3px;
+}
+
+
+/* =========================================
+   2. BOXES & DIVS
+   ========================================= */
+.pi-div-default,
+.pi-box-default {
+  background-color: #ffffff;
+  border: 1px solid #eeeeee;
+  padding: 24px;
+  border-radius: 16px;
+  min-height: 100px;
+  box-shadow: 0 3px 10px rgb(0 0 0 / 2%);
+}
+
+
+/* =========================================
+   3. TEXT INPUTS & TEXTAREA
+   ========================================= */
+.pi-input-text-default,
+.pi-input-password-default,
+.pi-textarea-default {
+  background-color: #f5f5f5;
+  color: #343434;
+  padding: 12px 16px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  width: 100%;
+  font-size: 0.95rem;
+  outline: none;
+  transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.pi-input-text-default:focus,
+.pi-input-password-default:focus,
+.pi-textarea-default:focus {
+  background-color: #ffffff;
+  border-color: #c9c9e8;
+  box-shadow: 0 0 0 4px #f0f0ff;
+}
+
+
+/* =========================================
+   4. RANGE SLIDER
+   ========================================= */
+.pi-input-range-default {
+  appearance: none;
+  height: 8px;
+  width: 100%;
+  background-color: #f1f1f1;
+  border-radius: 4px;
+  outline: none;
+  border: none;
+  cursor: pointer;
+}
+
+.pi-input-range-default::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #7770d8;
+  border: 3px solid #f0efff;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 8%);
+}
+
+.pi-input-range-default::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: #7770d8;
+  border: 3px solid #f0efff;
+  cursor: pointer;
+}
+
+
+/* =========================================
+   5. RADIO & CHECKBOX
+   ========================================= */
+.pi-input-radio-default,
+.pi-input-checkbox-default {
+  width: 20px;
+  height: 20px;
+  accent-color: #7770d8;
+  cursor: pointer;
+}
+
+
+/* =========================================
+   6. SELECT & DROPDOWNS
+   ========================================= */
+.pi-select-default,
+.pi-dropdown-default {
+  background-color: #f5f5f5;
+  color: #343434;
+  padding: 12px 16px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  width: 100%;
+  outline: none;
+  cursor: pointer;
+  transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.pi-select-default:focus,
+.pi-dropdown-default:focus {
+  background-color: #ffffff;
+  border-color: #c9c9e8;
+  box-shadow: 0 0 0 4px #f0f0ff;
+}
+
+
+/* =========================================
+   7. FILE UPLOAD
+   ========================================= */
+.pi-input-file-default {
+  background-color: #fafafa;
+  color: #343434;
+  padding: 12px;
+  border: 1px dashed #dedede;
+  border-radius: 12px;
+  width: 100%;
+  cursor: pointer;
+}
+
+
+/* =========================================
+   8. TYPOGRAPHY & LINKS
+   ========================================= */
+.pi-h2-default {
+  font-size: 1.5rem;
+  color: #212121;
+  margin: 0 0 8px;
+  font-weight: 700;
+}
+
+.pi-p-default {
+  font-size: 1rem;
+  color: #555555;
+  line-height: 1.6;
+  margin: 0 0 8px;
+}
+
+.pi-a-default {
+  color: #6558c9;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.pi-a-default:hover {
+  text-decoration: underline;
+}
+
+
+/* =========================================
+   9. MEDIA & IFRAMES
+   ========================================= */
+.pi-image-default {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.pi-video-default,
+.pi-audio-default,
+.pi-iframe-default,
+.pi-youtube-default,
+.pi-facebook-default {
+  width: 100%;
+  border: 1px solid #eeeeee;
+  border-radius: 12px;
+  background-color: #fafafa;
+}
+
+
+/* =========================================
+   10. TABLES
+   ========================================= */
+.pi-table-default {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background-color: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #eeeeee;
+}
+
+.pi-table-default th {
+  background-color: #f7f7fa;
+  color: #212121;
+  font-weight: 600;
+  text-align: left;
+  padding: 12px 16px;
+  border-bottom: 1px solid #eeeeee;
+}
+
+.pi-table-default td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f3f3f3;
+  color: #555555;
+}
+
+
+/* =========================================
+   11. CIRCLE
+   ========================================= */
+.Xcircle {
+  background: radial-gradient(circle, #ffffff 0%, #f7f7fa 100%);
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 3%);
+  border: 1px solid #eeeeee;
+}
+
+/* تنسيق الحاوية الرئيسية للنموذج */
+.pc-div-dcqg2 {
+  max-width: 380px;
+  margin: 50px auto;
+  padding: 35px 25px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* تنسيق حقول الإدخال (اسم المستخدم وكلمة المرور) */
+.pc-input-fq1uq,
+.pc-input-p6s9i {
+  width: 100%;
+  padding: 14px 16px;
+  font-size: 15px;
+  border: 2px solid #e1e4e8;
+  border-radius: 8px;
+  outline: none;
+  transition: all 0.3s ease;
+  background-color: #f8f9fa;
+  box-sizing: border-box; /* لضمان عدم خروج الحقول عن الإطار بسبب الـ padding */
+}
+
+/* تأثير عند الضغط أو الكتابة داخل الحقول */
+.pc-input-fq1uq:focus,
+.pc-input-p6s9i:focus {
+  border-color: #4f46e5; /* لون مميز (بنفسجي/أزرق حديث) */
+  background-color: #ffffff;
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+}
+
+/* تنسيق زر الإرسال */
+.pc-button-5leeh {
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+/* تأثير عند المرور بالماوس فوق الزر */
+.pc-button-5leeh:hover {
+  background: linear-gradient(135deg, #4338ca 0%, #3730a3 100%);
+  box-shadow: 0 6px 15px rgba(79, 70, 229, 0.4);
+  transform: translateY(-1px);
+}
+
+/* تأثير عند الضغط على الزر */
+.pc-button-5leeh:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+}

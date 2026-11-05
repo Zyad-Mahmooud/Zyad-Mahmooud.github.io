@@ -1,0 +1,53 @@
+<html>
+<head>
+	<meta name="viewport" charset="UTF-8" content="width=device-width, inital-scale=1.0">
+	<title>Picasso - viusla CSS Editor</title>
+<link rel="stylesheet" href="./CodeMirrorColorPicker/dist/codemirror-colorpicker.css">
+<link rel="stylesheet" href="./custom-elements.css">
+<link rel="stylesheet" href="./main.css">
+<script defer src="./toCSS.js"></script>
+<script defer src="custom-elements.js"></script>
+<script defer src="./CodeMirrorColorPicker/dist/codemirror-colorpicker.min.js"></script>
+<script defer src="./insertSection.js"></script>
+<script defer src="./insertController.js"></script>
+<script>
+  function initAll() {
+    window.addEventListener("load",()=>{
+      window.parent.CSSEditor = window;
+    });
+  }
+</script>
+<script defer src="./main.js" onload="initAll()"></script>
+<script defer src="./Controllers.js"></script>
+<script defer src="./CSSProps.js"></script>
+</head>
+<body>
+<div id="tools"></div>
+<!-- Templates -->
+
+<!--
+<div
+range-input="true"
+min="0"
+max="1000"
+title="width"
+prop="width"
+oninput="toValue(this.value)">
+</div>
+-->
+<div id="cmcp">
+	
+</div>
+<script defer>
+function display(el) {
+var carpet = el.parentElement.parentElement.querySelector('.carpet');
+(carpet.style.height == "" || carpet.style.height == "0px") ? carpet.style.height = "auto" : carpet.style.height = "0px";
+}
+window.addEventListener("load",()=>{
+  setTimeout(function() {
+  display(document.querySelector("#tools #Layout"));
+  }, 100);
+});
+</script>
+</body>
+</html>
