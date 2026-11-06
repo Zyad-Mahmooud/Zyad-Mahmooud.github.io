@@ -1,0 +1,97 @@
+<div class="meta">
+  gd
+</div>
+<div class="target">
+  
+</div>
+<input type="range" />
+<pre>
+  
+</pre>
+<script>
+  setInterval(function() {
+    const Codes = Paint.exportSheet(document.querySelector("style").sheet);
+    document.querySelector("pre").innerText = Codes ? Codes : "Empty 🤔";
+  }, 10);
+</script>
+<style>
+  .meta:not([data-function]) {
+    background-color: red;
+    width: 100px;
+    height: 100px;
+  }
+  .meta:not([data-function]):active {
+    background-color: blue;
+  }
+  .target {
+    background-color: #fff;
+    box-shadow: 0 0 8px rgba(0,0,0,0.084);
+    width: 90vw;
+    height: 390px;
+  }
+  input[type="range"] {
+    appearance: none;
+    width: 280px;
+    height: 8px;
+    border-radius: 50px;
+    background-color: rgb(241,241,241);
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50px;
+    background-color: black;
+  }
+  input[type="range"]::-webkit-slider-thumb:hover {
+    background-color: rgba(0,0,0,0.713);
+  }
+body input[type="range"]::-webkit-slider-thumb {}
+  @media (min-width: 300px) {
+    body input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50px;
+    background-color: black;
+  }
+  }
+</style>
+<script src="Paint.js" type="text/javascript" charset="utf-8"></script>
+<script>
+  var d = Paint.createSheet(`
+  .body-1783255680169  {
+  background-image: linear-gradient(135deg, rgb(17, 153, 142) 0%, rgb(56, 239, 125) 100%);
+}
+
+.body-1783255680169:active  {
+  background-image: linear-gradient(135deg, rgb(17, 153, 142) 0%, rgb(56, 239, 125) 100%);
+}
+
+:root  {
+  --bacd288efe1: linear-gradient(135deg, rgb(17, 153, 142) 0%, rgb(56, 239, 125) 100%)
+}
+
+
+`);
+Paint.minify(d);
+console.log(Paint.exportSheet(d))
+</script>
+<script onload="initBall()" src="picasso-ball.js" type="text/javascript" charset="utf-8"></script>
+<script type="module">
+  import { parse,stringify } from './Selector Parser.js';
+  window.CSSSelector = {
+    parse,
+    stringify
+  };
+/*
+document.body.appendChild(Paint.deepCloneNodeWithStyles(document.querySelector(".Bro")));
+document.body.appendChild(Paint.deepCloneNodeWithStyles(document.querySelector(".Bro")));
+document.body.appendChild(Paint.deepCloneNodeWithStyles(document.querySelector(".Bro")));
+document.body.appendChild(Paint.deepCloneNodeWithStyles(document.querySelector(".Bro")));
+document.body.appendChild(Paint.deepCloneNodeWithStyles(document.querySelector(".Bro")));
+document.body.appendChild(Paint.deepCloneNodeWithStyles(document.querySelector(".app")));
+
+console.log(CSSInsertEngine) // ✅
+*/
+</script>

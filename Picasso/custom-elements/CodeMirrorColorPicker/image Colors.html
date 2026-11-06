@@ -1,0 +1,45 @@
+<link rel="stylesheet" href="dist/codemirror-colorpicker.css" />
+<script src="dist/codemirror-colorpicker.min.js"></script>
+<img id="palette-image" width="100" height="100" alt="uploaded"/>
+<input type="file" onchange="generatePalette ()" id="image"/>
+<div id="image-palette"></div>
+<div id="colors"></div>
+<script>
+function generatePalette () {
+
+document.querySelector("#colors").innerHTML = "";
+var blob = document.getElementById('image').files[0];
+var Color = CodeMirrorColorPicker.Color;
+document.getElementById('palette-image').src = URL.createObjectURL(blob);
+Color.ImageToRGB(blob, { maxWidth: 100 }, function (results) {
+const colors = Color.palette(results, 16); // how much result
+colors.forEach((color)=>{
+var ColorCard = document.createElement("div");
+ColorCard.className = "ColorCard";
+ColorCard.innerText = color;
+ColorCard.style.backgroundColor = color;
+document.querySelector("#colors").appendChild(ColorCard);
+});
+});
+}
+</script>
+<style>
+  .ColorCard {
+    width: 110px;
+    height: 100px;
+    flex: 3;
+  }
+  #colors {
+    display: flex;
+    flex-wrap: wrap;
+    background-color: red;
+    border-radius: 5px;
+    width: 100%;
+    height: 90%;
+  }
+  .colors div {
+    width: 90px;
+    height: 90px;
+    border-radius: 5px;
+  }
+</style>

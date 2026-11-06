@@ -1,0 +1,544 @@
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+<script src="Paint.js"></script>
+<script src="CSSOM Observer.js"></script>
+<script>
+const x = Paint.createSheet(`/* قواعد عامة */
+.card {
+  background: linear-gradient(135deg, rgb(102, 126, 234) 0%, rgb(118, 75, 162) 100%);
+  color: white;
+  padding: 20px;
+  border-radius: 20px;
+  font-size: 1.2rem;
+}
+a { display: flex; color: initial; }
+a { display: flex; }
+a { display: flex; }
+a { display: flex; }
+a { display: flex; }
+a { display: flex; }
+a { display: flex; }
+a { display: flex; }
+@supports (display: flex) {
+  body {
+    display: flex;
+  }
+}
+.button {
+  background: linear-gradient(135deg, rgb(102, 126, 234) 0%, rgb(118, 75, 162) 100%);
+  color: white;
+  padding: 12px 25px;
+  border-radius: 50px;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+/* Media Query */
+@media (max-width: 768px) {
+  .card {
+    background: linear-gradient(135deg, rgb(102, 126, 234) 0%, rgb(118, 75, 162) 100%);
+    padding: 10px;
+    font-size: 1rem;
+  }
+
+  .button {
+    background: linear-gradient(135deg, rgb(102, 126, 234) 0%, rgb(118, 75, 162) 100%);
+    padding: 10px 20px;
+    font-size: 1rem;
+  }
+}
+
+/* Container setup */
+.layout {
+  container-type: inline-size;
+}
+
+/* Container Query */
+@container name (max-width: 400px) {
+  .card {
+    background: linear-gradient(135deg, rgb(102, 126, 234) 0%, rgb(118, 75, 162) 100%);
+    padding: 8px;
+    font-size: 0.9rem;
+  }
+
+  .button {
+    background: linear-gradient(135deg, rgb(102, 126, 234) 0%, rgb(118, 75, 162) 100%);
+    padding: 8px 16px;
+    font-size: 0.9rem;
+  }
+}
+@media (max-width: 400px) {
+  .card {
+    background: linear-gradient(135deg, rgb(102, 126, 234) 0%, rgb(118, 75, 162) 100%);
+    padding: 8px;
+    font-size: 0.9rem;
+  }
+  .xyz {}
+  .button {
+    background: linear-gradient(135deg, rgb(102, 126, 234) 0%, rgb(118, 75, 162) 100%);
+    padding: 8px 16px;
+    font-size: 0.9rem;
+  }
+}
+/*:root { --the-first: red; }*/
+.c-toggler-8654988 {  }
+.c-console-9982433 {  }
+.c-message-5902361 {  }
+.__c-string {  }
+.c-stack-8639898 {  }
+.c-date-5956133 {  }
+.c-trace-3440479 {  }
+.c-message-8488390 {  }
+.c-stack-3571748 {  }
+.c-date-6420464 {  }
+.c-trace-6896938 {  }
+.c-message-5527383 {  }
+.c-text-3961838 {  }
+.c-type-5823225 {  }
+.c-group-3050147 {  }
+.c-stack-8528505 {  }
+.c-date-6843019 {  }
+.c-trace-2660693 {  }
+.c-message-4630786 {  }
+.c-stack-9949329 {  }
+.c-date-6277094 {  }
+.c-trace-7571944 {  }
+.c-message-9234972 {  }
+.c-stack-226474 {  }
+.c-date-2457783 {  }
+.c-trace-3674144 {  }
+.c-message-1238177 {  }
+.c-stack-7354558 {  }
+.c-date-6180273 {  }
+.c-trace-5714177 {  }
+.c-message-5920315 {  }
+.c-stack-8661773 {  }
+.c-date-9650400 {  }
+.c-trace-9134292 {  }
+.c-input-3345455 {  }
+.textarea-4957642 {  }
+.section-6560113 {
+   padding: 80px 20px;
+   text-align: center;
+   background: linear-gradient(135deg, rgb(102, 126, 234) 0%, rgb(118, 75, 162) 100%);
+   color: white;
+   border-radius: 20px;
+ }
+.div-796387453 {  }
+.h1-704210719 {
+   font-size: 3rem;
+   margin-bottom: 20px;
+   font-family: sans-serif;
+ }
+.span-164557847 { color: rgb(255, 235, 59); }
+.p-128132568 {
+   font-size: 1.2rem;
+   margin-bottom: 30px;
+   opacity: 0.9;
+ }
+.div-830665811 {  }
+.button-149586693 {
+   padding: 12px 25px;
+   background: white;
+   color: rgb(118, 75, 162);
+   border: none;
+   border-radius: 50px;
+   cursor: pointer;
+   font-weight: bold;
+   margin-right: 10px;
+ }
+.button-177441205 {
+   padding: 12px 25px;
+   background: transparent;
+   color: white;
+   border: 2px solid white;
+   border-radius: 50px;
+   cursor: pointer;
+ }
+.div-1730854 {
+   width: 280px;
+   padding: 30px;
+   background: rgb(255, 255, 255);
+   border-radius: 15px;
+   box-shadow: rgba(0, 0, 0, 0.05) 0px 10px 30px;
+   text-align: center;
+   transition: transform 0.3s;
+ }
+.div-1730854:hover { transform: translateY(-10px); }
+.div-674796442 { font-size: 40px; margin-bottom: 15px; }
+.h3-812594590 { margin-bottom: 10px; color: rgb(51, 51, 51); }
+.p-275797894 {
+   color: rgb(102, 102, 102);
+   font-size: 0.95em;
+   line-height: 1.5;
+ }
+.body-5604609 {  }
+:root {  }
+.c-toggler-8654988 {  }
+.div-674796442 {  }
+.Openpicasso-ball-menu-this {  }
+.btn {  }
+.div-29205506 {
+   width: 280px;
+   padding: 30px;
+   background: rgb(255, 255, 255);
+   border-radius: 15px;
+   box-shadow: rgba(0, 0, 0, 0.05) 0px 10px 30px;
+   text-align: center;
+   transition: transform 0.3s;
+ }
+.div-29205506:hover { transform: translateY(-10px); }
+.div-450672616 { font-size: 40px; margin-bottom: 15px; }
+.div-450672616 {  }
+.h3-374856946 { margin-bottom: 10px; color: rgb(51, 51, 51); }
+.p-832897824 {
+   color: rgb(102, 102, 102);
+   font-size: 0.95em;
+   line-height: 1.5;
+ }
+.div-477054647 {
+   width: 280px;
+   padding: 30px;
+   background: rgb(255, 255, 255);
+   border-radius: 15px;
+   box-shadow: rgba(0, 0, 0, 0.05) 0px 10px 30px;
+   text-align: center;
+   transition: transform 0.3s;
+ }
+.div-477054647:hover { transform: translateY(-10px); }
+.div-292477516 { font-size: 40px; margin-bottom: 15px; }
+.div-292477516 {  }
+.h3-172092704 { margin-bottom: 10px; color: rgb(51, 51, 51); }
+.p-621622415 {
+   color: rgb(102, 102, 102);
+   font-size: 0.95em;
+   line-height: 1.5;
+ }
+.div-468610665 {
+   width: 280px;
+   padding: 30px;
+   background: rgb(255, 255, 255);
+   border-radius: 15px;
+   box-shadow: rgba(0, 0, 0, 0.05) 0px 10px 30px;
+   text-align: center;
+   transition: transform 0.3s;
+ }
+.div-468610665:hover { transform: translateY(-10px); }
+.div-98544603 { font-size: 40px; margin-bottom: 15px; }
+.div-98544603 {  }
+.h3-532431604 { margin-bottom: 10px; color: rgb(51, 51, 51); }
+.p-765442917 {
+   color: rgb(102, 102, 102);
+   font-size: 0.95em;
+   line-height: 1.5;
+ }
+.div-567945711 {
+   width: 280px;
+   padding: 30px;
+   background: rgb(255, 255, 255);
+   border-radius: 15px;
+   box-shadow: rgba(0, 0, 0, 0.05) 0px 10px 30px;
+   text-align: center;
+   transition: transform 0.3s;
+ }
+.div-567945711:hover { transform: translateY(-10px); }
+.div-24667619 { font-size: 40px; margin-bottom: 15px; }
+.div-24667619 {  }
+.h3-385390377 { margin-bottom: 10px; color: rgb(51, 51, 51); }
+.p-511966694 {
+   color: rgb(102, 102, 102);
+   font-size: 0.95em;
+   line-height: 1.5;
+ }
+.div-56566617 {
+   width: 280px;
+   padding: 30px;
+   background: rgb(255, 255, 255);
+   border-radius: 15px;
+   box-shadow: rgba(0, 0, 0, 0.05) 0px 10px 30px;
+   text-align: center;
+   transition: transform 0.3s;
+ }
+.div-56566617:hover { transform: translateY(-10px); }
+.div-601427398 { font-size: 40px; margin-bottom: 15px; }
+.div-601427398 {  }
+.h3-39734141 { margin-bottom: 10px; color: rgb(51, 51, 51); }
+.p-148229767 {
+   color: rgb(102, 102, 102);
+   font-size: 0.95em;
+   line-height: 1.5;
+ }
+.div-794883424 {
+   width: 280px;
+   padding: 30px;
+   background: rgb(255, 255, 255);
+   border-radius: 15px;
+   box-shadow: rgba(0, 0, 0, 0.05) 0px 10px 30px;
+   text-align: center;
+   transition: transform 0.3s;
+ }
+.div-794883424:hover { transform: translateY(-10px); }
+.div-165754484 { font-size: 40px; margin-bottom: 15px; }
+.div-165754484 {  }
+.h3-479161764 { margin-bottom: 10px; color: rgb(51, 51, 51); }
+.p-457326717 {
+   color: rgb(102, 102, 102);
+   font-size: 0.95em;
+   line-height: 1.5;
+ }
+.c-toggler-8654988 {  }
+.textarea-4957642 {  }
+.__show-data {  }
+.c-toggler-8654988 {  }
+.div-601427398 {  }
+.div-455249107 {
+   width: 280px;
+   padding: 30px;
+   background: rgb(255, 255, 255);
+   border-radius: 15px;
+   box-shadow: rgba(0, 0, 0, 0.05) 0px 10px 30px;
+   text-align: center;
+   transition: transform 0.3s;
+ }
+.div-455249107:hover { transform: translateY(-10px); }
+.div-627230904 { font-size: 40px; margin-bottom: 15px; }
+.div-627230904 {  }
+.h3-689983203 { margin-bottom: 10px; color: rgb(51, 51, 51); }
+.p-283910626 {
+   color: rgb(102, 102, 102);
+   font-size: 0.95em;
+   line-height: 1.5;
+ }
+.div-343979346 {
+   width: 280px;
+   padding: 30px;
+   background: rgb(255, 255, 255);
+   border-radius: 15px;
+   box-shadow: rgba(0, 0, 0, 0.05) 0px 10px 30px;
+   text-align: center;
+   transition: transform 0.3s;
+ }
+.div-343979346:hover { transform: translateY(-10px); }
+.div-529435219 { font-size: 40px; margin-bottom: 15px; }
+.div-529435219 {  }
+.h3-85336577 { margin-bottom: 10px; color: rgb(51, 51, 51); }
+.p-565113738 {
+   color: rgb(102, 102, 102);
+   font-size: 0.95em;
+   line-height: 1.5;
+ }
+.div-728621874 {
+   width: 280px;
+   padding: 30px;
+   background: rgb(255, 255, 255);
+   border-radius: 15px;
+   box-shadow: rgba(0, 0, 0, 0.05) 0px 10px 30px;
+   text-align: center;
+   transition: transform 0.3s;
+ }
+.div-728621874:hover { transform: translateY(-10px); }
+.div-367270877 { font-size: 40px; margin-bottom: 15px; }
+.div-367270877 {  }
+.h3-536835528 { margin-bottom: 10px; color: rgb(51, 51, 51); }
+.p-665217488 {
+   color: rgb(102, 102, 102);
+   font-size: 0.95em;
+   line-height: 1.5;
+ }
+.div-451913794 {
+   width: 280px;
+   padding: 30px;
+   background: rgb(255, 255, 255);
+   border-radius: 15px;
+   box-shadow: rgba(0, 0, 0, 0.05) 0px 10px 30px;
+   text-align: center;
+   transition: transform 0.3s;
+ }
+.div-451913794:hover { transform: translateY(-10px); }
+.div-15463560 { font-size: 40px; margin-bottom: 15px; }
+.div-15463560 {  }
+.h3-801345441 { margin-bottom: 10px; color: rgb(51, 51, 51); }
+.p-58283514 {
+   color: rgb(102, 102, 102);
+   font-size: 0.95em;
+   line-height: 1.5;
+ }
+.div-61169778 {
+   width: 280px;
+   padding: 30px;
+   background: rgb(255, 255, 255);
+   border-radius: 15px;
+   box-shadow: rgba(0, 0, 0, 0.05) 0px 10px 30px;
+   text-align: center;
+   transition: transform 0.3s;
+ }
+.div-61169778:hover { transform: translateY(-10px); }
+.div-581929222 { font-size: 40px; margin-bottom: 15px; }
+.div-581929222 {  }
+.h3-711068567 { margin-bottom: 10px; color: rgb(51, 51, 51); }
+.p-593817166 {
+   color: rgb(102, 102, 102);
+   font-size: 0.95em;
+   line-height: 1.5;
+ }
+.div-71281196 {
+   width: 280px;
+   padding: 30px;
+   background: rgb(255, 255, 255);
+   border-radius: 15px;
+   box-shadow: rgba(0, 0, 0, 0.05) 0px 10px 30px;
+   text-align: center;
+   transition: transform 0.3s;
+ }
+.div-71281196:hover { transform: translateY(-10px); }
+.div-818698417 { font-size: 40px; margin-bottom: 15px; }
+.div-818698417 {  }
+.h3-757473264 { margin-bottom: 10px; color: rgb(51, 51, 51); }
+.p-781052008 {
+   color: rgb(102, 102, 102);
+   font-size: 0.95em;
+   line-height: 1.5;
+ }
+.div-567233702 {
+   width: 280px;
+   padding: 30px;
+   background: rgb(255, 255, 255);
+   border-radius: 15px;
+   box-shadow: rgba(0, 0, 0, 0.05) 0px 10px 30px;
+   text-align: center;
+   transition: transform 0.3s;
+ }
+.div-567233702:hover { transform: translateY(-10px); }
+.div-761673245 { font-size: 40px; margin-bottom: 15px; }
+.div-761673245 {  }
+.h3-68799678 { margin-bottom: 10px; color: rgb(51, 51, 51); }
+.p-439029644 {
+   color: rgb(102, 102, 102);
+   font-size: 0.95em;
+   line-height: 1.5;
+ }
+.p-457326717 {  }
+.textarea-4957642 {  }
+.__show-data {  }
+.c-type-2560595 {  }
+.textarea-4957642 {  }
+.c-code-3685663 {  }
+.textarea-4957642 {  }
+.__c-string {  }
+.c-code-2183288 {  }
+.textarea-4957642 {  }
+.Openpicasso-ball-menu-this {  }
+.textarea-4957642 {  }
+    .section-3884604 {
+   padding: 80px 20px;
+   text-align: center;
+   background: var(--ba1d9e6c89);
+   color: var(--co8539d9a1);
+   border-radius: var(--bod4d09e4c);
+ }
+.h1-700796280 {
+   font-size: 3rem;
+   margin-bottom: var(--bod4d09e4c);
+   font-family: var(--fo2eb0942c);
+ }
+.span-3597978 { color: var(--col44a3bd7b); }
+.p-355284985 {
+   font-size: 1.2rem;
+   margin-bottom: 30px;
+   opacity: 0.9;
+ }
+.button-234607332 {
+   padding: var(--pad6ce5faf7);
+   background: var(--co8539d9a1);
+   color: var(--co719641f3);
+   border: none;
+   border-radius: var(--boab4aacd1);
+   cursor: var(--cu79d11921);
+   font-weight: bold;
+   margin-right: 10px;
+ }
+.button-333526871 {
+   padding: var(--pad6ce5faf7);
+   background: var(--ba8edacf5f);
+   color: var(--co8539d9a1);
+   border: var(--bo45a7dc87);
+   border-radius: var(--boab4aacd1);
+   cursor: var(--cu79d11921);
+ }
+.section-2232846 {
+   padding: 80px 20px;
+   text-align: center;
+   background: var(--ba1d9e6c89);
+   color: var(--co8539d9a1);
+   border-radius: var(--bod4d09e4c);
+ }
+.h1-160768012 {
+   font-size: 3rem;
+   margin-bottom: var(--bod4d09e4c);
+   font-family: var(--fo2eb0942c);
+ }
+.span-396133530 { color: var(--col44a3bd7b); }
+.p-833513655 {
+   font-size: 1.2rem;
+   margin-bottom: 30px;
+   opacity: 0.9;
+ }
+.button-817775565 {
+   padding: var(--pad6ce5faf7);
+   background: var(--co8539d9a1);
+   color: var(--co719641f3);
+   border: none;
+   border-radius: var(--boab4aacd1);
+   cursor: var(--cu79d11921);
+   font-weight: bold;
+   margin-right: 10px;
+ }
+.button-526237220 {
+   padding: var(--pad6ce5faf7);
+   background: var(--ba8edacf5f);
+   color: var(--co8539d9a1);
+   border: var(--bo45a7dc87);
+   border-radius: var(--boab4aacd1);
+   cursor: var(--cu79d11921);
+ }
+:root {
+   --ba1d9e6c89: linear-gradient(135deg, rgb(102, 126, 234) 0%, rgb(118, 75, 162) 100%);
+   --co8539d9a1: white;
+   --bod4d09e4c: 20px;
+   --fo2eb0942c: sans-serif;
+   --col44a3bd7b: rgb(255, 235, 59);
+   --pad6ce5faf7: 12px 25px;
+   --co719641f3: rgb(118, 75, 162);
+   --boab4aacd1: 50px;
+   --cu79d11921: pointer;
+   --ba8edacf5f: transparent;
+   --bo45a7dc87: 2px solid white;
+ }
+@media (min-width: 803px) {
+ 
+ }
+@media (min-width: 800px) {
+ .section-3884604 {  }
+.div-598100944 { background-image: linear-gradient(120deg, rgb(240, 147, 251) 0%, rgb(245, 87, 108) 100%); }
+
+ }
+@media (min-width: 700px) {
+ .button-234607332 { background-image: linear-gradient(167deg, rgb(255, 0, 0) 0%, rgb(0, 255, 0) 50%, rgb(0, 0, 255) 100%); }
+
+ }
+@media (min-width: 400px) {
+ .button-333526871 { background-image: linear-gradient(to right, rgb(19, 78, 94) 0%, rgb(113, 178, 128) 100%); }
+
+ }
+@media (min-width: 1366px) {
+ 
+ }
+`);
+Paint.minify(x);
+Paint.Clean(x);
+console.log("x",Paint.exportSheet(x));
+console.log(Paint.createSheet(`@supports (display: flex) {
+  body {
+    display: flex;
+  }
+}`));
+</script>

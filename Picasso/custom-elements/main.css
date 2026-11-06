@@ -1,0 +1,114 @@
+:root {
+	--w: clac(100vw);
+}
+	body {
+		background: #1a1a1a;
+		flex-direction: column;
+		overflow-x: hidden;
+		display: flex;
+	}
+.whitespace {
+  background: white;
+  margin-left: -10px;
+  width: calc(100vw + 5px);
+}
+	.topnav {
+		background: linear-gradient(to bottom, rgba(0, 0, 0, 0.864), rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.864));
+		margin-top: -20px;
+		margin-bottom: 10px;
+		margin-left: 0px;
+		width: 100%;
+		color: silver;
+		height: 30px;
+	}
+	.topnav > .propTitle {
+		margin-top: 5px;
+		margin-left: 10px;
+		position: absolute;
+	}
+	.showSettings {
+	}
+	.carpet {
+  background: #1a1a1a;
+  background-image: url("./download.png");
+  margin-left: -8px;
+  width: calc(100% + 19px);
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap; /* خليها wrap مش warp */
+  height: 0px;
+  margin-bottom: -10px;
+  overflow: hidden;
+}
+
+.carpet > * {
+  flex: 1 1 calc(50% - 8px); /* مش أكتر من عنصرين */
+  margin-bottom: 8px;
+}
+	.flex {
+		margin-top: -10px;
+	}
+	.codemirror-colorpicker {
+		background-color: #1a1a1a;
+		position: fixed;
+		display: none;
+		box-shadow: 0 0 10px black;
+		border: none;
+		height: 410px;
+		z-index: 999999 !important;
+	}
+	c-toggler {
+		margin-left: 140px;
+	}
+
+.prop-propTitle {
+	color: white;
+	margin-left: 8px;
+	display: block;
+	margin-bottom: 8px;
+}
+#Status {
+	margin-top: 5px;
+	margin-left: 58%;
+	position: absolute;
+}
+#Status > span {
+	color: red;
+}
+.ColorSelectorContainer {
+	background: #1a1a1a;
+  background-image: url("./download.png");
+  box-shadow: inset 0 0 10px black;
+  border-radius: 10px;
+  margin-top: 12px;
+  width: 150px auto;
+  height: 50px;
+  display: flex;
+  justify-content: flex-start;
+  justify-items: center;
+  align-content: flex-start;
+  align-items: center;
+	}
+.ColorSelector {
+	width: 35px;
+	height: 35px;
+	margin-left: 8px;
+	border-radius: 50px;
+	background: white;
+	border: 1px solid rgb(61,61,61);
+}
+.ColorSelector-title {
+	margin-left: 53px;
+	margin-bottom: 18px;
+	margin-top: 8px;
+	width: auto;
+	position: fixed;
+}
+.text-input {
+  background: none;
+  border-color: #212121;
+  border-radius: 15px;
+  height: 40px;
+  width: 200px;
+  color: silver;
+}
