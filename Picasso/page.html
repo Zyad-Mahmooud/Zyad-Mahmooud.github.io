@@ -1,31 +1,9 @@
 <html>
 <head>
   <title>Page</title>
-<link rel="stylesheet" href="/lib/Style/defaults.css">
-<link rel="stylesheet" href="/lib/Style/items.css" type="text/css" media="all" />
-<link rel="stylesheet" href="/lib/Style/Components.css" type="text/css" media="all" />
-<script>
-// الاستماع للردود من الـ Service Worker
-navigator.serviceWorker.onmessage = (event) => {
-    if (event.data.message === "success") {
-        console.log("Files stored successfully!");
-    }
-};
-
-if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./app.js",{
-    updateViaCache: 'none' // يمنع كاش الـ HTTP من تخزين ملف الـ Service Worker نفسه
-})
-        .then(reg => {
-            return navigator.serviceWorker.ready;
-        })
-        .then(() => {
-            if (!navigator.serviceWorker.controller) {
-                location.reload();
-            }
-        });
-}
-</script>
+<link rel="stylesheet" href="./lib/Style/defaults.css">
+<link rel="stylesheet" href="./lib/Style/items.css" type="text/css" media="all" />
+<link rel="stylesheet" href="./lib/Style/Components.css" type="text/css" media="all" />
 <script>
     // وظيفة معالجة الجراديانت عند تحميل السكربت الخاص به
     function initGradientParser() {
@@ -74,7 +52,7 @@ if ("serviceWorker" in navigator) {
       console.log("rootRef is set");
       var link = document.createElement("link");
       link.rel = "stylesheet";
-      link.href = "lib/Style/none.css";
+      link.href = "./lib/Style/none.css";
       link.onload = function() {
         window.ComponentsSheet = Paint.getSheetRoot("none.css");
       };
@@ -83,14 +61,14 @@ if ("serviceWorker" in navigator) {
   </script>
 <script type="module">
     import { parse, stringify } from './addons/Selector Parser/Selector Parser.js';
-    window.CSSSelector = { parse, stringify };
+  window.CSSSelector = { parse, stringify };
   </script>
-<script src="addons/Selector Parser/Paint.js" defer onload="initPaint()"></script>
-<script src="lib/core/bitcode-core.js" defer></script>
-<script src="addons/Gradient Parser/index.js" defer onload="initGradientParser()"></script>
-<script src="addons/Selector Parser/picasso-ball.js" defer onload="initBall()"></script>
-<script src="lib/core/selection-core.js" defer onload="initSelectionCore()"></script>
-<script src="lib/Core/items.js" type="text/javascript" charset="utf-8"></script>
+<script src="./addons/Selector Parser/Paint.js" defer onload="initPaint()"></script>
+<script src="./lib/Core/bitcode-core.js" defer></script>
+<script src="./addons/Gradient Parser/index.js" defer onload="initGradientParser()"></script>
+<script src="./addons/Selector Parser/picasso-ball.js" defer onload="initBall()"></script>
+<script src="./lib/Core/selection-core.js" defer onload="initSelectionCore()"></script>
+<script src="./lib/Core/items.js" type="text/javascript" charset="utf-8"></script>
   <script>
     window.addEventListener("error", function (err) { console.log(err); });
     window.addEventListener("message", function (err) { console.log(err); });

@@ -4,9 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Picasso UI</title>
-  <link rel="stylesheet" href="UI.css" type="text/css" media="all" />
-  <link rel="stylesheet" href="/lib/Style/items.css" type="text/css" media="all" />
-  <link rel="stylesheet" href="/lib/Style/Components.css" type="text/css" media="all" />
+  <link rel="stylesheet" href="./UI.css" type="text/css" media="all" />
+  <link rel="stylesheet" href="./lib/Style/items.css" type="text/css" media="all" />
+  <link rel="stylesheet" href="./lib/Style/Components.css" type="text/css" media="all" />
     <script type="module">
       import {parse,stringify} from "./addons/Selector Parser/Selector Parser.js";
       window.CSSSelector = {
@@ -26,7 +26,7 @@
     <input oninput="setViewport(this)" type="number" placeholder="height">
     </div>
     <div class="frame">
-     <iframe onload="initEntrypoint(this)" id="Preview" src="page.html"></iframe>
+     <iframe onload="initEntrypoint(this)" id="Preview" src="./page.html"></iframe>
     </div>
     <div class="leftnav">
       <div class="circle">
@@ -81,11 +81,11 @@
             <div id="Components"></div>
             <!-- items-list inclues a toggler that toggles between items/pre-made components modes -->
     </div>
-    <script src="UI.js" type="text/javascript" charset="utf-8"></script>
-    <script src="/lib/Core/DOMPatcher.js" type="text/javascript" charset="utf-8"></script>
-<script src="/lib/Core/Components.js" type="text/javascript" charset="utf-8"></script>
-<script src="/addons/Selector Parser/Paint.js" type="text/javascript" charset="utf-8"></script>
-<script src="/lib/Core/History.js" type="text/javascript" charset="utf-8"></script>
+    <script src="./UI.js" type="text/javascript" charset="utf-8"></script>
+    <script src="./lib/Core/DOMPatcher.js" type="text/javascript" charset="utf-8"></script>
+<script src="./lib/Core/Components.js" type="text/javascript" charset="utf-8"></script>
+<script src="./addons/Selector Parser/Paint.js" type="text/javascript" charset="utf-8"></script>
+<script src="./lib/Core/History.js" type="text/javascript" charset="utf-8"></script>
 <div id="DOMPatcher">
   <button class="close-items" onclick="openDOMEditor()">&times;</button>
   <hr />
@@ -98,7 +98,7 @@
   <button class="close-items" onclick="toggleCSSEditor()">&times;</button>
   <br>
   <hr />
-<iframe id="css-editor-container" src="custom-elements/custom-elements.html"></iframe>
+<iframe id="css-editor-container" src="./custom-elements/custom-elements.html"></iframe>
 </div>
 <div id="DOM-Tree">
   <button class="close-items" onclick="toggleDOMTree()">&times;</button>
@@ -122,8 +122,8 @@
 <div id="subtitles">
   <p></p>
 </div>
-<script src="/lib/scripts/dom-dnd.js" type="text/javascript" charset="utf-8"></script>
-<script src="/lib/scripts/jszip.min.js" type="text/javascript" charset="utf-8"></script>
-<script src="/addons/Selector Parser/Paint.js" type="text/javascript" charset="utf-8"></script>
+<script src="./lib/scripts/dom-dnd.js" type="text/javascript" charset="utf-8"></script>
+<script src="./lib/scripts/jszip.min.js" type="text/javascript" charset="utf-8"></script>
+<script src="./addons/Selector Parser/Paint.js" type="text/javascript" charset="utf-8"></script>
   </body>
 </html>
