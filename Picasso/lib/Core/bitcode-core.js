@@ -581,10 +581,10 @@ window.addEventListener("load",()=>{
 let isSyncing = false;
 
 onChange((e) => {
+    // التحقق المبدئي السريع للخروج المبكر (Guard Clauses)
     if (isSyncing || e.type !== "DOM" || e.trigger !== "addNode") return;
 
-    const parent = e.target;
-    const addedNode = e.addedNode;
+    const { target: parent, addedNode } = e;
     
     // بناء محدد (Selector) دقيق يشمل الـ tagName والـ type إذا وجد
     let selector = `:scope > ${addedNode.localName}`;
@@ -595,24 +595,41 @@ onChange((e) => {
 
     const siblings = parent.querySelectorAll(selector);
     
+    // نحتاج على الأقل عنصرين لتحديد النموذج (Archetype) والعنصر الجديد
     if (siblings.length >= 2) {
         isSyncing = true;
         
-        const archetype = siblings[siblings.length - 2];
-        const newNode = Paint.deepCloneNodeWithStyles(archetype);
-       if(newNode.children.length >= 1) {
-          newNode.children.forEach((e)=>{
-          if(e) {
-            newNode.removeChild(e);
-          }
-        });
+        try {
+            // اختيار العنصر المرجعي (قبل الأخير)
+            const archetype = siblings[siblings.length - 2];
+            
+            if (archetype && archetype !== addedNode) {
+                const newNode = Paint.deepCloneNodeWithStyles(archetype);
+                
+                // تنظيف الأبناء إن وجدوا بطريقة آمنة
+                if (newNode.children && newNode.children.length > 0) {
+                    Array.from(newNode.children).forEach((child) => {
+                        if (child && typeof window.actions?.del === 'function') {
+                            window.actions.del(child);
+                        }
+                    });
+                }
+                
+                // إزالة الـ ID لتجنب التكرار (Duplicate IDs)
+                newNode.removeAttribute('id');
+                
+                // استبدال العنصر المضاف بالنسخة المحسنة
+                parent.replaceChild(newNode, addedNode);
+            }
+        } catch (error) {
+            console.error("Error during node synchronization:", error);
+        } finally {
+            // ضمان إعادة تعيين حالة المزامنة دائماً مهما حدث
+            isSyncing = false;
         }
-        newNode.removeAttribute('id');
-        parent.replaceChild(newNode, addedNode);
-        
-        isSyncing = false;
     }
 });
+
 
 
 

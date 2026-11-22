@@ -936,10 +936,213 @@ var CSSProps = {
     backgroundImage: {
       type: "file",
       group: "background"
+    },
+    // الصق جوه var CSSProps = { ... } — 32 خاصية جديدة بس (مفيش تكرار مع ملفك)
+
+    flexWrap: {
+    	group: "Layout",
+    	type: "select",
+    	options: ["nowrap","wrap","wrap-reverse"],
+    	title: "flex wrap"
+    },
+    visibility: {
+    	group: "Layout",
+    	type: "select",
+    	options: ["visible","hidden","collapse"],
+    	title: "visibility"
+    },
+    verticalAlign: {
+    	group: "Layout",
+    	type: "select",
+    	options: ["baseline","top","middle","bottom","text-top","text-bottom","sub","super"],
+    	title: "vertical align"
+    },
+    tableLayout: {
+    	group: "Layout",
+    	type: "select",
+    	options: ["auto","fixed"],
+    	title: "table layout"
+    },
+    placeItems: {
+    	group: "Spacing",
+    	type: "select",
+    	options: ["start","end","center","stretch","baseline"],
+    	title: "place items"
+    },
+    placeContent: {
+    	group: "Spacing",
+    	type: "select",
+    	options: ["start","end","center","stretch","space-between","space-around","space-evenly"],
+    	title: "place content"
+    },
+    textWrap: {
+    	group: "typography",
+    	type: "select",
+    	options: ["wrap","nowrap","balance","pretty","stable"],
+    	title: "text wrap"
+    },
+    webkitBoxOrient: {
+    	group: "typography",
+    	type: "select",
+    	options: ["horizontal","vertical"],
+    	title: "box orient (for line clamp)"
+    },
+    listStyleType: {
+    	group: "typography",
+    	type: "select",
+    	options: ["none","disc","circle","square","decimal","decimal-leading-zero","lower-alpha","upper-alpha","lower-roman","upper-roman"],
+    	title: "list marker type"
+    },
+    listStylePosition: {
+    	group: "typography",
+    	type: "select",
+    	options: ["outside","inside"],
+    	title: "list marker position"
+    },
+    objectPosition: {
+    	group: "Image",
+    	type: "select",
+    	options: ["center","top","bottom","left","right","top left","top right","bottom left","bottom right"],
+    	title: "object position"
+    },
+    backgroundBlendMode: {
+    	group: "background",
+    	type: "select",
+    	options: ["normal","multiply","screen","overlay","darken","lighten","color-dodge","color-burn","difference","exclusion","hue","saturation","color","luminosity"],
+    	title: "background blend mode"
+    },
+    transformStyle: {
+    	group: "effects",
+    	type: "select",
+    	options: ["flat","preserve-3d"],
+    	title: "transform style"
+    },
+    backfaceVisibility: {
+    	group: "effects",
+    	type: "select",
+    	options: ["visible","hidden"],
+    	title: "backface visibility"
+    },
+    overscrollBehavior: {
+    	group: "interaction",
+    	type: "select",
+    	options: ["auto","contain","none"],
+    	title: "overscroll behavior"
+    },
+    touchAction: {
+    	group: "interaction",
+    	type: "select",
+    	options: ["auto","none","pan-x","pan-y","manipulation","pinch-zoom"],
+    	title: "touch action"
+    },
+    scrollbarWidth: {
+    	group: "interaction",
+    	type: "select",
+    	options: ["auto","thin","none"],
+    	title: "scrollbar width"
+    },
+    colorScheme: {
+    	group: "advanced",
+    	type: "select",
+    	options: ["normal","light","dark","light dark"],
+    	title: "color scheme"
+    },
+    order: {
+    	group: "Layout",
+    	type: "range",
+    	min: -20,
+    	max: 20,
+    	unit: "",
+    	title: "flex/grid order"
+    },
+    inset: {
+    	group: "Layout",
+    	type: "range",
+    	title: "inset (all sides)"
+    },
+    webkitLineClamp: {
+    	group: "typography",
+    	type: "range",
+    	min: 1,
+    	max: 20,
+    	unit: "",
+    	title: "line clamp (max lines)"
+    },
+    textIndent: {
+    	group: "typography",
+    	type: "range",
+    	title: "text indent"
+    },
+    tabSize: {
+    	group: "typography",
+    	type: "range",
+    	min: 1,
+    	max: 16,
+    	unit: "",
+    	title: "tab size"
+    },
+    fontStretch: {
+    	group: "typography",
+    	type: "range",
+    	min: 50,
+    	max: 200,
+    	unit: "%",
+    	title: "font stretch"
+    },
+    webkitTextStrokeWidth: {
+    	group: "typography",
+    	type: "range",
+    	min: 0,
+    	max: 20,
+    	unit: "px",
+    	title: "text stroke width"
+    },
+    rotate: {
+    	group: "effects",
+    	type: "range",
+    	min: -360,
+    	max: 360,
+    	unit: "deg",
+    	title: "rotate"
+    },
+    scale: {
+    	group: "effects",
+    	type: "range",
+    	min: 0,
+    	max: 5,
+    	step: 0.1,
+    	unit: "",
+    	title: "scale"
+    },
+    transitionDelay: {
+    	group: "effects",
+    	type: "range",
+    	unit: "ms",
+    	title: "transition delay"
+    },
+    accentColor: {
+    	group: "Coloring",
+    	type: "color",
+    	title: "accent color (checkbox / range)"
+    },
+    webkitTextStrokeColor: {
+    	group: "Coloring",
+    	type: "color",
+    	title: "text stroke color"
+    },
+    listStyleImage: {
+    	group: "typography",
+    	type: "file",
+    	title: "list marker image"
+    },
+    maskImage: {
+    	group: "effects",
+    	type: "file",
+    	title: "mask image"
     }
 };
-
-console.log(`There's around ${Object.keys(CSSProps).filter(prop => !String(prop).includes('_')).length} Property`);
+const len = Object.keys(CSSProps).filter(prop => !String(prop).includes('_')).length;
+console.log(`There's around ${len} Property, that's ${((len/Object.keys(document.createElement("style").style).length)*100).toFixed(0)}% of the entire CSSOM properties 🤯`);
 
 /*
   __color: {

@@ -51,13 +51,9 @@ if(window.parent.Objects) {
 function config() {
 
 }
-function resetProperty(prop,container) {
-	if(window.parent.Objects) {
-		window.parent.Objects.targetRule[prop] = "";
-	} else {
-      console.log("editor is disconnected");
-    }
-	container.parentElement.parentElement.querySelector("Selector").removeAttribute("style");
+function resetProperty(el) {
+	el.parentElement.parentElement.querySelector('.ColorSelector').removeAttribute("style");
+	window.parent.Objects.targetRule[el.parentElement.parentElement.parentElement.getAttribute("prop")] = "";
 }
 
 function setPropertyValue(h) {
@@ -165,7 +161,7 @@ text: `<input type="text" oninput="setPropertyValue(this)" onclick="setPropertyV
         	<p class="ColorSelector-title golden-text" style="display: inline!important; position: relative;important;">${property.title || prop.replaceAll(/([A-Z])/g,(_,p)=>{
         	  return " "+p.toLowerCase();
         	})}</p>
-        	<p style="margin-left:38px; font-size:10px; margin-top:25px;"><a onclick="event.preventDefault();resetProperty(camelToKebab('${prop}'),this)" href="#">Reset</a></p>
+        	<p style="margin-left:38px; font-size:10px; margin-top:25px;"><a onclick="event.preventDefault();resetProperty(this)" href="#">Reset</a></p>
         	`;
         	var CP = element.querySelector(".ColorSelector");
         	CP.addEventListener("click",(e)=>{
@@ -267,7 +263,7 @@ text: `<input type="text" oninput="setPropertyValue(this)" onclick="setPropertyV
         	element.innerHTML = `
         	<div prop="${prop}" class="ColorSelector"></div>
         	<p class="ColorSelector-title golden-text">${prop}</p>
-        	<p style="margin-left:38px; font-size:10px; margin-top:25px;"><a onclick="event.preventDefault();resetProperty(camelToKebab('${prop}'),this)" href="#">Reset</a></p>
+        	<p style="margin-left:38px; font-size:10px; margin-top:25px;"><a onclick="event.preventDefault();resetProperty(this)" href="#">Reset</a></p>
         	`;
         	output.appendChild(element);
         }

@@ -1,6 +1,76 @@
 function initEntrypoint(el) {
   window.Entrypoint = el.contentWindow;
 }
+function movable(el) {
+  let startX = 0, startY = 0;
+  let x = 0, y = 0;
+  let raf = null;
+  let dragging = false;
+
+  el.style.position = "fixed";
+  el.style.touchAction = "none";
+  el.style.transition = "none";
+
+  el.addEventListener("pointerdown", e => {
+    // 1. إذا كان الضغط بزر غير الأيسر أو أثناء السحب بالفعل، اخرج
+    if (e.button !== 0 || dragging) return;
+
+    // 2. تجنب بدء السحب إذا كان المستخدم ينقر داخل حقل إدخال أو نص قابل للتعديل
+    const target = e.target;
+    if (
+      target.tagName === "INPUT" ||
+      target.tagName === "TEXTAREA" ||
+      target.tagName === "SELECT" ||
+      target.isContentEditable
+    ) {
+      return; // اترك السلوك الافتراضي ليعمل (الكتابة / التركيز)
+    }
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    document.querySelectorAll("[data-higher]").forEach(item => {
+      item.removeAttribute("data-higher");
+    });
+
+    el.setAttribute("data-higher", "true");
+
+    dragging = true;
+
+    startX = e.clientX - x;
+    startY = e.clientY - y;
+
+    el.setPointerCapture(e.pointerId);
+  });
+
+  el.addEventListener("pointermove", e => {
+    if (!dragging) return;
+
+    x = e.clientX - startX;
+    y = e.clientY - startY;
+    
+    // استخدام requestAnimationFrame بشكل أصح وأكثر سلاسة
+    if (!raf) {
+      raf = requestAnimationFrame(() => {
+        el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+        raf = null;
+      });
+    }
+  });
+
+  function stopDrag(e) {
+    if (!dragging) return;
+    dragging = false;
+
+    if (el.hasPointerCapture && el.hasPointerCapture(e.pointerId)) {
+      el.releasePointerCapture(e.pointerId);
+    }
+  }
+
+  el.addEventListener("pointerup", stopDrag);
+  el.addEventListener("pointercancel", stopDrag);
+}
+
 function setViewport(el) {
   document.getElementById("Preview").style[el.getAttribute("placeholder")] = el.value ? el.value+"px" : "";
 }
@@ -22,7 +92,7 @@ function renderDOMCard(el) {
          if(typeof programs[NodeCard.node.localName] == "function") {
            programs[NodeCard.node.localName](el);
          }
-         window.Objects.targetRule = createStyleProxy(NodeCard.cssom);
+         window.Objects.targetRule = createStyleProxy(NodeCard.cssom[0].rule.style);
          window.Objects.targetElement = new Proxy(NodeCard.node,{
         get: (t,p) => {
           return t[p];
@@ -102,40 +172,6 @@ document.querySelector("#Components").addEventListener("dragstart",(e)=>{
   }, 400);
   Entrypoint.frameElement.focus();
 });
-const CSSEditor = document.querySelector("#css-editor");
-let startX, startY, originX = 0, originY = 0, x = 0, y = 0, raf = null;
-let w, h;
-
-CSSEditor.style.touchAction = "none"; // يمنع تدخل المتصفح بالتمرير
-CSSEditor.style.willChange = "transform";
-
-CSSEditor.addEventListener("touchstart", e => {
-  e.stopPropagation();
-    const t = e.touches[0];
-    const r = CSSEditor.getBoundingClientRect();
-    w = r.width; h = r.height;
-    startX = t.clientX - x;
-    startY = t.clientY - y;
-    originX = r.left - x; // موضع العنصر بدون الـ transform
-    originY = r.top - y;
-}, { passive: true });
-
-CSSEditor.addEventListener("touchmove", e => {
-    e.preventDefault();
-    e.stopPropagation();
-    const t = e.touches[0];
-
-    x = t.clientX - startX;
-    y = t.clientY - startY;
-
-    // القيود
-    
-
-    if (!raf) raf = requestAnimationFrame(() => {
-        CSSEditor.style.transform = `translate(${x}px, ${y}px)`;
-        raf = null;
-    });
-}, { passive: false });
 if(typeof onChange == "function") {
   onChange((e)=>{
     if(e.type == "DOM") {
@@ -473,7 +509,7 @@ function DesignToVideo() {
     Picasso.history.redo.call(Picasso.history);
     
     // تحديث الـ Timeline والـ UI
-    if (MGT) {
+    if (MGT && !MGT.matches("*:focus")) {
       MGT.value = Picasso.history.index;
     }
     availableLengthSpan.textContent = Picasso.history.Stack.length;
@@ -494,10 +530,13 @@ function DesignToVideo() {
         if(subtitles) {
           subtitles.innerText = `Go to 🖌️ > ${groupName} > then select ${propName} then change it's value to ${propVal}`;
         }
-      } else if(currentItem.type == "DOM") {
+      } else if(currentItem.type == "DOM" && currentItem.prop) {
         if(subtitles) {
-          subtitles.innerText = `Update DOM element property ${currentItem.prop} to ${currentItem.value}`;
+     subtitles.innerText = `Update DOM element property ${currentItem.prop} to " ${currentItem.value} "`;
         }
+      }
+      if(currentItem.type == "CSSOM" && currentItem.subTrigger == "insert-finished") {
+        subtitles.innerText = `drag a ${currentItem.node.localName} and drop it into ${currentItem.parent.localName}`;
       }
     }
 
@@ -524,3 +563,217 @@ window.addEventListener("dragend",()=>{
 function upload(file) {
   return URL.createObjectURL(file);
 }
+function togglePluginsList() {
+  const plgsMg = document.querySelector("#plugins-manager");
+   plgsMg.style.display = plgsMg.style.display != "none" ? "none" : "flex";
+}
+function toggleSandbox(th) {
+  th.parentElement.parentNode.parentNode.parentNode.removeChild(th.parentElement.parentNode.parentNode);
+}
+customElements.define("plugin-info",class PicassoPluginCard extends HTMLElement {
+  connectedCallback() {
+    this.addEventListener("click",(clickEv)=>{
+      if(!clickEv.target.matches(".danger-zone")) {
+        const plgsMg = document.querySelector("#plugin-player");
+        const player = document.createElement("container");
+        player.innerHTML = `<div id="plugin-player" style="display: flex;">
+  <div class="whitespace">
+    <nav>
+      <button class="close-items" onclick="toggleSandbox(this);">&times;</button>
+    </nav>
+  </div>
+  <iframe id="sandbox" src="/plugins/plg~uus907201"></iframe>
+</div>`;
+      document.querySelector("#players").appendChild(player);
+      player.querySelector("iframe").src = this.querySelector("[endpoint]").getAttribute("endpoint");
+      movable(player.firstChild);
+      togglePluginsList();
+    plgsMg.dispatchEvent(new Event("click"));
+      }
+    });
+  }
+});
+document.addEventListener("readystatechange",(e)=>{
+  if(document.readyState == "interactive") {
+movable(document.querySelector("#items-list"));
+movable(document.querySelector("#css-editor"));
+movable(document.querySelector("#DOMPatcher"));
+movable(document.querySelector("#plugins-manager"));
+movable(document.querySelector("#plugin-player"));
+  }
+});
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').then((registration) => {
+    console.log('Service Worker registered successfully');
+  });
+}
+
+async function o(file) {
+  if (!navigator.serviceWorker.controller) {
+    alert("يرجى الانتظار حتى يتم تفعيل الـ Service Worker أولاً وإعادة تحميل الصفحة.");
+    return;
+  }
+
+  // إرسال الملف والبادئة الخاصة بالـ Endpoint الجديدة
+  // مثلاً ستصبح الروابط تبدأ من: /app/
+  navigator.serviceWorker.controller.postMessage({
+    type: 'LOAD_ZIP',
+    zipFile: file,
+    endpointPrefix: `/plg~${String(Math.floor(Math.random()*6271882272272)).substring(1,23)}/`
+  });
+}
+
+// استقبال الرد عند الانتهاء
+navigator.serviceWorker.addEventListener('message', (event) => {
+if (event.data.type == 'ZIP_LOADED_SUCCESS') {
+    fetch(event.data.prefix+"manifest.json").then((res)=>{
+      res.json().then((data)=>{
+        renderPluginsList();
+      });
+    });
+  }
+});
+
+function PluginsList() {
+  fetch("/list").then((res)=>{
+    res.text().then((Data)=>{
+      console.log(Data);
+    });
+  });
+}
+function uploadPlugin() {
+  const FileUploader = document.createElement("input");
+  FileUploader.type = "file";
+  FileUploader.click();
+  FileUploader.addEventListener("change",()=>{
+    if(FileUploader.files[0].type == "application/zip") {
+      o(FileUploader.files[0]);
+    } else {
+      alert("invalid zip");
+    }
+  });
+}
+function SearchForPlugin(keyword) {
+document.querySelectorAll("#plugins-list plugin-info").forEach((el)=>{
+   if(keyword.length >= 1 && el.innerText.includes(keyword)) {
+      el.style.display = "flex";
+    } else {
+      el.style.display = "none";
+    }
+    if(keyword.length == 0) {
+      el.style.display = "flex";
+    }
+  });
+}
+
+// دالة لجلب قائمة الإضافات المثبتة من الـ Service Worker
+function getInstalledPlugins() {
+  return new Promise((resolve, reject) => {
+    // التأكد من أن الـ Service Worker يعمل ومسيطر على الصفحة
+    if (!navigator.serviceWorker.controller) {
+      return reject(new Error("الـ Service Worker غير مفعل أو لا يسيطر على الصفحة بعد."));
+    }
+
+    // إنشاء مستمع مؤقت للرسائل القادمة من الـ SW
+    const messageHandler = (event) => {
+      const { type, plugins, error } = event.data || {};
+
+      if (type === 'PLUGINS_LIST') {
+        // إزالة المستمع حتى لا يتكرر بلا داعٍ
+        navigator.serviceWorker.removeEventListener('message', messageHandler);
+        resolve(plugins); // إرجاع مصفوفة الإضافات
+      } else if (type === 'PLUGINS_LIST_ERROR') {
+        navigator.serviceWorker.removeEventListener('message', messageHandler);
+        reject(new Error(error));
+      }
+    };
+
+    navigator.serviceWorker.addEventListener('message', messageHandler);
+    navigator.serviceWorker.addEventListener('message', (message)=>{
+      console.log("message from zip manager",message.data);
+    });
+
+    // إرسال أمر الاستعلام للـ Service Worker
+    navigator.serviceWorker.controller.postMessage({
+      type: 'LIST_PLUGINS'
+    });
+  });
+}
+function unstallPlugin(el) {
+  const pluginElement = el.closest(".plugin"); // أو الـ parent المناسب حسب هيكلتك
+  const endpoint = pluginElement.getAttribute("endpoint");
+  
+  if (!endpoint) {
+    console.error("Endpoint not found on element!");
+    return;
+  }
+
+  const c = confirm(`Do You Want To Uninstall this plugin?`);
+  if(c) {
+    pluginElement.remove();
+    navigator.serviceWorker.controller.postMessage({
+      type: 'DELETE_ZIP',
+      endpointPrefix: endpoint
+    });
+  }
+}
+
+// ───────────── مثال على الاستخدام وعرضها في الواجهة ─────────────
+async function renderPluginsList() {
+  try {
+    const listContainer = document.getElementById("plugins-list");
+    listContainer.innerHTML = "<p>جاري جلب الإضافات...</p>";
+
+    const plugins = await getInstalledPlugins();
+    listContainer.innerHTML = ""; // تفريغ القائمة قبل العرض
+
+    if (!plugins || plugins.length === 0) {
+      listContainer.innerHTML = `<p class="nothingness">you have no installed Plugins 🧩 yet</p>`;
+      return;
+    }
+
+    plugins.forEach((plugin) => {
+      console.log("Plugin loaded:", plugin);
+
+      // بناء مسار الأيقونة بشكل سليم
+      const cleanPrefix = plugin.endpointPrefix.endsWith('/') ? plugin.endpointPrefix : plugin.endpointPrefix + '/';
+      const cleanIconPath = plugin.icon ? plugin.icon.replace(/^\//, '') : 'icon.png';
+      const fullIconUrl = cleanPrefix + cleanIconPath;
+      
+      fetch(plugin.endpointPrefix+"manifest.json").then(function(res){
+        res.json().then(function(plgJson){
+          const plgWrapper = document.createElement("div");
+          plgWrapper.innerHTML = `
+        <plugin-info>
+          <div class="plugin" endpoint="${plugin.endpointPrefix}${plgJson.entry}">
+            <div class="plugin-icon center">
+              <!-- استخدام onerror لعرض أيقونة افتراضية في حال لم تكن الصورة موجودة -->
+              <img src="${plugin.endpointPrefix}${plgJson.icon}" alt="${plugin.name}">
+            </div>
+            <div class="info">
+              <p class="app-name">${plgJson.app_name}</p>
+              <p class="app-description">${plgJson.description}</p>
+            </div>
+<div onclick="unstallPlugin(this)" class="danger-zone center">&times;</div>
+          </div>
+        </plugin-info>
+      `;
+      listContainer.appendChild(plgWrapper.firstElementChild);
+        });
+      });
+      // إدراج العنصر في القائمة بشكل صحيح وفوري
+      console.log("-------------------");
+    });
+
+  } catch (error) {
+    console.error("حدث خطأ أثناء جلب الإضافات:", error.message);
+    document.getElementById("plugins-list").innerHTML = `<p style="color: red;">خطأ في تحميل الإضافات</p>`;
+  }
+}
+
+document.addEventListener("readystatechange",()=>{
+  if(document.readyState == "complete") {
+    renderPluginsList();
+  }
+});

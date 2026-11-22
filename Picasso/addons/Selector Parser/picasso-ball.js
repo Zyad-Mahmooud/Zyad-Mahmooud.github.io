@@ -193,7 +193,7 @@ function initBall() {
     margin-top: -62px;
   }
 </style>`;
-  if(!document.querySelector(`[data-function="zero"]`)){
+  if(!document.querySelector(`[data-function="zero"]`) && window.frameElement && window.frameElement.hasAttribute("floating-ball") && window.frameElement.getAttribute("floating-ball") == "yes"){
     document.body.appendChild(DOM);
   }
   const button = document.querySelector(".Openpicasso-ball-menu-this");

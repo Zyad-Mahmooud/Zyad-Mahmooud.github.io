@@ -4,9 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Picasso UI</title>
-  <link rel="stylesheet" href="./UI.css" type="text/css" media="all" />
-  <link rel="stylesheet" href="./lib/Style/items.css" type="text/css" media="all" />
-  <link rel="stylesheet" href="./lib/Style/Components.css" type="text/css" media="all" />
+  <link rel="stylesheet" href="UI.css" type="text/css" media="all" />
+  <link rel="stylesheet" href="/lib/Style/items.css" type="text/css" media="all" />
+  <link rel="stylesheet" href="/lib/Style/Components.css" type="text/css" media="all" />
     <script type="module">
       import {parse,stringify} from "./addons/Selector Parser/Selector Parser.js";
       window.CSSSelector = {
@@ -26,7 +26,11 @@
     <input oninput="setViewport(this)" type="number" placeholder="height">
     </div>
     <div class="frame">
-     <iframe onload="initEntrypoint(this)" id="Preview" src="./page.html"></iframe>
+    <iframe onload="initEntrypoint(this)" id="Preview" src="page.html" floating-ball="no"></iframe>
+    <!--
+    floating-ball="yes" -> show floating ball
+    floating-ball="no" -> hide floating ball
+    -->
     </div>
     <div class="leftnav">
       <div class="circle">
@@ -45,7 +49,8 @@
         <button class="feature" onclick="toggleDOMTree()"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" viewBox="-4.0 -8.0 88.0 108.0" enable-background="new 0 0 80 80" xml:space="preserve"><path d="M8,35.667h12c2.757,0,5-2.243,5-5v-2c0-2.757-2.243-5-5-5h-4v-2.333h9c1.104,0,2-0.896,2-2s-0.896-2-2-2h-9V15h4  c2.757,0,5-2.243,5-5V8c0-2.757-2.243-5-5-5H8C5.243,3,3,5.243,3,8v2c0,2.757,2.243,5,5,5h4v8.667H8c-2.757,0-5,2.243-5,5v2  C3,33.423,5.243,35.667,8,35.667z"/><path d="M20,65h-4v-8.667h4c2.757,0,5-2.243,5-5v-2c0-2.757-2.243-5-5-5H8c-2.757,0-5,2.243-5,5v2c0,2.757,2.243,5,5,5h4V65H8  c-2.757,0-5,2.243-5,5v2c0,2.757,2.243,5,5,5h12c2.757,0,5-2.243,5-5v-2C25,67.243,22.757,65,20,65z"/><path d="M72,34H60c-2.757,0-5,2.243-5,5v2c0,2.757,2.243,5,5,5h12c2.757,0,5-2.243,5-5v-2C77,36.243,74.757,34,72,34z"/><path d="M51,37.987h-9V25.333h4c2.757,0,5-2.243,5-5v-2c0-2.757-2.243-5-5-5H34c-2.757,0-5,2.243-5,5v2c0,2.757,2.243,5,5,5h4  v29.333h-4c-2.414,0-4.434,1.721-4.899,4H20c-1.104,0-2,0.896-2,2s0.896,2,2,2h9.101c0.465,2.279,2.484,4,4.899,4h12  c2.757,0,5-2.243,5-5v-2c0-2.757-2.243-5-5-5h-4v-12.68h9c1.104,0,2-0.896,2-2S52.104,37.987,51,37.987z"/></svg></button>
       </div>
       <div class="circle">
-        <button class="feature"></button>
+        <button onclick="togglePluginsList();" class="feature"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" viewBox="0 0 100 125" style="enable-background:new 0 0 100 100;" xml:space="preserve"><path d="M75.5,43.8V32.5c0-4.4-3.6-8-8-8H56.3c0-6.9-5.6-12.5-12.5-12.5s-12.5,5.6-12.5,12.5H20c-4.4,0-8,3.6-8,8v11.3  c6.9,0,12.5,5.6,12.5,12.5S18.9,68.8,12,68.8V80c0,4.4,3.6,8,8,8h11.3c0-6.9,5.6-12.5,12.5-12.5S56.3,81.1,56.3,88h11.3  c4.4,0,8-3.6,8-8V68.8c6.9,0,12.5-5.6,12.5-12.5S82.5,43.8,75.5,43.8z"/>
+</svg></button>
       </div>
       <div class="circle">
         <button class="feature"></button>
@@ -81,11 +86,11 @@
             <div id="Components"></div>
             <!-- items-list inclues a toggler that toggles between items/pre-made components modes -->
     </div>
-    <script src="./UI.js" type="text/javascript" charset="utf-8"></script>
-    <script src="./lib/Core/DOMPatcher.js" type="text/javascript" charset="utf-8"></script>
-<script src="./lib/Core/Components.js" type="text/javascript" charset="utf-8"></script>
-<script src="./addons/Selector Parser/Paint.js" type="text/javascript" charset="utf-8"></script>
-<script src="./lib/Core/History.js" type="text/javascript" charset="utf-8"></script>
+    <script src="UI.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/lib/Core/DOMPatcher.js" type="text/javascript" charset="utf-8"></script>
+<script src="/lib/Core/Components.js" type="text/javascript" charset="utf-8"></script>
+<script src="/addons/Selector Parser/Paint.js" type="text/javascript" charset="utf-8"></script>
+<script src="/lib/Core/History.js" type="text/javascript" charset="utf-8"></script>
 <div id="DOMPatcher">
   <button class="close-items" onclick="openDOMEditor()">&times;</button>
   <hr />
@@ -94,11 +99,9 @@
   </div>
 </div>
 <div id="css-editor">
-  <input type="range" id="transparency" max="99" min="10" oninput="setTrans(this.value)">
   <button class="close-items" onclick="toggleCSSEditor()">&times;</button>
-  <br>
   <hr />
-<iframe id="css-editor-container" src="./custom-elements/custom-elements.html"></iframe>
+<iframe id="css-editor-container" src="custom-elements/custom-elements.html"></iframe>
 </div>
 <div id="DOM-Tree">
   <button class="close-items" onclick="toggleDOMTree()">&times;</button>
@@ -122,8 +125,30 @@
 <div id="subtitles">
   <p></p>
 </div>
-<script src="./lib/scripts/dom-dnd.js" type="text/javascript" charset="utf-8"></script>
-<script src="./lib/scripts/jszip.min.js" type="text/javascript" charset="utf-8"></script>
-<script src="./addons/Selector Parser/Paint.js" type="text/javascript" charset="utf-8"></script>
+<div id="plugins-manager">
+  <div class="plugins-flexbox-section">
+    <button class="upload" onclick="uploadPlugin()"><svg style="margin-bottom: -10px;" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="-5.0 -10.0 110.0 135.0">
+ <path d="m50.004 12.5c12.863 0 23.789 9.1758 26.168 21.629 18.488 1.6914 26.805 24.352 13.57 37.582-3.9922 3.9922-9.5117 6.4648-15.605 6.4648h-13.336v-11.176h15.988l-26.785-26.785-26.789 26.785h15.988v11.18l-13.332-0.003907c-19.598 0-29.477-23.809-15.605-37.676 3.543-3.543 8.2891-5.8867 13.57-6.3711 2.3789-12.453 13.305-21.629 26.168-21.629zm-4.7969 48.5v26.5h9.5938v-26.5h7.5039l-12.301-12.301-12.305 12.301z" fill-rule="evenodd"/>
+ </svg></button>
+ <input type="search" placeholder="Search for a Plugin 🧩, Tool 🔨" class="Search" oninput="SearchForPlugin(this.value)">
+  </div>
+  <button onclick="togglePluginsList();" class="close-items" type="submit">&times;</button>
+<hr />
+  <div id="plugins-list">
+    
+  </div>
+</div>
+<div id="plugin-player">
+  <div class="whitespace">
+    <nav>
+      <button class="close-items" onclick="toggleSandbox(this);">&times;</button>
+    </nav>
+  </div>
+  <iframe id="sandbox" src="/plugins/plg~uus907201"></iframe>
+</div>
+<div id="players"></div>
+<script src="/lib/scripts/dom-dnd.js" type="text/javascript" charset="utf-8"></script>
+<script src="/lib/scripts/jszip.min.js" type="text/javascript" charset="utf-8"></script>
+<script src="/addons/Selector Parser/Paint.js" type="text/javascript" charset="utf-8"></script>
   </body>
 </html>
