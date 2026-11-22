@@ -1,3 +1,5 @@
 git add -A
 git commit -m "That's the latest version, for now"
-git push origin main
+git push origin main --force
+
+echo "Published 🚀";
