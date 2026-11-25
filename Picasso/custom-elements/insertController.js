@@ -24,13 +24,6 @@ function insertController(obj) {
     wrapper.appendChild(styling2);
     wrapper.appendChild(styling3);
     wrapper.innerHTML += obj.html;
-    wrapper.querySelectorAll("[range-input=\"true\"]").forEach((RI)=>{
-      if(RI) {
-        RI.outerHTML = `
-        <range-input></range-input>
-        `;
-      }
-    });
     container.appendChild(w);
   if(typeof obj.onLoad === "function") {
         obj.onLoad(wrapper);

@@ -1,6 +1,260 @@
 function initEntrypoint(el) {
   window.Entrypoint = el.contentWindow;
 }
+(() => {
+  const HOST_DB_NAME = 'PluginsHostDB';
+  const HOST_DB_VERSION = 1;
+  const STORE_NAME = 'kv_store';
+
+  // ───────────── 1. إدارة IndexedDB في الصفحة الحاضنة ─────────────
+
+  function openHostDB() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open(HOST_DB_NAME, HOST_DB_VERSION);
+      req.onerror = () => reject(req.error);
+      req.onsuccess = () => resolve(req.result);
+      req.onupgradeneeded = (event) => {
+        const db = event.target.result;
+        if (!db.objectStoreNames.contains(STORE_NAME)) {
+          const store = db.createObjectStore(STORE_NAME, { keyPath: 'fullKey' });
+          store.createIndex('byPluginId', 'pluginId', { unique: false });
+        }
+      };
+    });
+  }
+
+  function makeFullKey(pluginId, key) {
+    return `${pluginId}_${String(key)}`;
+  }
+
+  async function hostSet(pluginId, key, value) {
+    const db = await openHostDB();
+    const fullKey = makeFullKey(pluginId, key);
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      tx.objectStore(STORE_NAME).put({
+        fullKey,
+        pluginId,
+        key: String(key),
+        value,
+        updatedAt: Date.now()
+      });
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+
+  async function hostGet(pluginId, key) {
+    const db = await openHostDB();
+    const fullKey = makeFullKey(pluginId, key);
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readonly');
+      const req = tx.objectStore(STORE_NAME).get(fullKey);
+      req.onsuccess = () => resolve(req.result ? req.result.value : undefined);
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  async function hostGetPluginMap(pluginId) {
+    const db = await openHostDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readonly');
+      const index = tx.objectStore(STORE_NAME).index('byPluginId');
+      const req = index.getAll(IDBKeyRange.only(pluginId));
+      req.onsuccess = () => {
+        const map = {};
+        for (const item of req.result || []) {
+          map[item.fullKey] = item.value;
+        }
+        resolve(map);
+      };
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  // ───────────── 2. كود التهيئة الذي تحقنه الصفحة الحاضنة داخل الإطار ─────────────
+
+  function buildGuestBootstrapCode(pluginId, initialEntries) {
+    const serializedEntries = JSON.stringify(initialEntries || {});
+    const serializedPluginId = JSON.stringify(pluginId);
+
+    return `
+      (() => {
+        // حذف / تعطيل localStorage و sessionStorage
+        for (const storageName of ['localStorage', 'sessionStorage','top','parent','frameElement']) {
+          try {
+            delete window[storageName];
+          } catch (_) {}
+
+          try {
+            Object.defineProperty(window, storageName, {
+              get() {
+                return undefined;
+              },
+              configurable: false
+            });
+          } catch (_) {}
+        }
+
+        // plugin id = pathname فقط (بدون search أو hash)
+        const pluginID = (location.pathname) || ${serializedPluginId};
+        const db = ${serializedEntries};
+
+        let hostPort = null;
+        let resolveReady;
+        const readyPromise = new Promise((resolve) => {
+          resolveReady = resolve;
+        });
+
+        const pending = new Map();
+        let counter = 0;
+
+        window.addEventListener('message', (event) => {
+          if (event.data && event.data.type === 'HOST_DATA_PORT' && event.ports && event.ports[0]) {
+            hostPort = event.ports[0];
+            hostPort.onmessage = (msgEvent) => {
+              const { requestId, ok, result, error } = msgEvent.data || {};
+              const resolver = pending.get(requestId);
+              if (!resolver) return;
+              pending.delete(requestId);
+              if (ok) resolver.resolve(result);
+              else resolver.reject(new Error(error || 'Host storage error'));
+            };
+            hostPort.start();
+            resolveReady();
+          }
+        });
+
+        function postToHost(action, payload) {
+          return readyPromise.then(() => {
+            const requestId = 'req_' + (++counter) + '_' + Date.now();
+            return new Promise((resolve, reject) => {
+              pending.set(requestId, { resolve, reject });
+              hostPort.postMessage({ requestId, pluginID, action, payload });
+            });
+          });
+        }
+
+        const Data = {
+          set(key, value) {
+            const fullKey = pluginID + '_' + String(key);
+            db[fullKey] = value;
+            return postToHost('SET', { key: String(key), value });
+          },
+          get(key) {
+            const fullKey = pluginID + '_' + String(key);
+            if (Object.prototype.hasOwnProperty.call(db, fullKey)) {
+              return db[fullKey];
+            }
+            return postToHost('GET', { key: String(key) }).then((val) => {
+              if (val !== undefined) {
+                db[fullKey] = val;
+              }
+              return val;
+            });
+          },
+          has(key) {
+            const fullKey = pluginID + '_' + String(key);
+            return Object.keys(db).includes(fullKey);
+          },
+          remove(key) {
+            const fullKey = pluginID + '_' + String(key);
+            delete db[fullKey];
+          },
+          keys() {
+          return Object.keys(this.Data());
+          },
+          Data() {
+  const prefix = pluginID + '_';
+  const entriesObj = {};
+  for (const fullKey of Object.keys(db)) {
+    if (fullKey.startsWith(prefix)) {
+      const cleanKey = fullKey.slice(prefix.length);
+      entriesObj[cleanKey] = db[fullKey];
+    }
+  }
+  return entriesObj;
+}
+        };
+
+        Object.defineProperty(window, 'Data', {
+          value: Object.freeze(Data),
+          writable: false,
+          configurable: false
+        });
+      })();
+    `;
+  }
+
+  // ───────────── 3. إدارة الإطار بالكامل من الصفحة الحاضنة ─────────────
+
+  async function wireIframeFromHost(iframe) {
+    const resolvedUrl = new URL(iframe.src || iframe.contentWindow.location.href, location.origin);
+    const pluginId = resolvedUrl.pathname;
+
+    // جلب البيانات السابقة لهذه الإضافة من IndexedDB في الصفحة الحاضنة
+    const initialEntries = await hostGetPluginMap(pluginId);
+    iframe.contentWindow.onChange = onChange;
+    const doc = iframe.contentDocument;
+    if (!doc) {
+      console.warn('تعذر الوصول إلى contentDocument للإطار بسبب قيود العزل/الأصل.');
+      return;
+    }
+
+    // حقن سكربت التهيئة في بداية رأس الصفحة داخل الإطار
+    const scriptEl = doc.createElement('script');
+    scriptEl.textContent = buildGuestBootstrapCode(pluginId, initialEntries);
+    (doc.head || doc.documentElement).prepend(scriptEl);
+
+    // إنشاء قناة الرسائل وإدارتها بالكامل من الصفحة الحاضنة
+    const channel = new MessageChannel();
+    const portForHost = channel.port1;
+    const portForGuest = channel.port2;
+
+    portForHost.onmessage = async (event) => {
+      const { requestId, action, payload } = event.data || {};
+      if (!requestId || !action) return;
+
+      try {
+        if (action === 'SET') {
+          await hostSet(pluginId, payload.key, payload.value);
+          portForHost.postMessage({ requestId, ok: true, result: true });
+        } else if (action === 'GET') {
+          const value = await hostGet(pluginId, payload.key);
+          portForHost.postMessage({ requestId, ok: true, result: value });
+        } else {
+          throw new Error('Unknown action: ' + action);
+        }
+      } catch (err) {
+        portForHost.postMessage({
+          requestId,
+          ok: false,
+          error: err && err.message ? err.message : 'IndexedDB error'
+        });
+      }
+    };
+
+    portForHost.start();
+    iframe.contentWindow.postMessage({ type: 'HOST_DATA_PORT' }, '*', [portForGuest]);
+  }
+window.wireIframeFromHost = wireIframeFromHost;
+function mountPluginIframe(container, src) {
+    const iframe = document.createElement('iframe');
+    iframe.src = src;
+    iframe.addEventListener('load', () => {
+      wireIframeFromHost(iframe).then(()=>{
+        console.log(`نجحت تهيئة الإطار`);
+      }).catch((err) => {
+        console.error('فشل تهيئة الإطار من الصفحة الحاضنة:', err);
+      });
+    });
+    container.appendChild(iframe);
+    return iframe;
+  }
+
+  // تعريض الدالة على مستوى الصفحة الحاضنة عند الحاجة
+  window.mountPluginIframe = mountPluginIframe;
+})();
 function movable(el) {
   let startX = 0, startY = 0;
   let x = 0, y = 0;
@@ -585,6 +839,9 @@ customElements.define("plugin-info",class PicassoPluginCard extends HTMLElement 
   <iframe id="sandbox" src="/plugins/plg~uus907201"></iframe>
 </div>`;
       document.querySelector("#players").appendChild(player);
+      player.querySelector("#sandbox").addEventListener('load', () => {
+      wireIframeFromHost(player.querySelector("#sandbox"));
+    });
       player.querySelector("iframe").src = this.querySelector("[endpoint]").getAttribute("endpoint");
       movable(player.firstChild);
       togglePluginsList();
@@ -701,29 +958,56 @@ function getInstalledPlugins() {
   });
 }
 function unstallPlugin(el) {
-  const pluginElement = el.closest(".plugin"); // أو الـ parent المناسب حسب هيكلتك
-  const endpoint = pluginElement.getAttribute("endpoint");
-  
-  if (!endpoint) {
-    console.error("Endpoint not found on element!");
+  const pluginElement = el?.closest(".plugin");
+  if (!pluginElement) {
+    console.error("Plugin element (.plugin) not found!");
     return;
   }
 
-  const c = confirm(`Do You Want To Uninstall this plugin?`);
-  if(c) {
-    pluginElement.remove();
-    navigator.serviceWorker.controller.postMessage({
-      type: 'DELETE_ZIP',
-      endpointPrefix: endpoint
-    });
+  // استخراج بادئة الإضافة (مثل /plg~12345/) وليس مسار ملف التشغيل الكامل
+  let endpointPrefix = pluginElement.getAttribute("data-prefix");
+  if (!endpointPrefix) {
+    const rawEndpoint = pluginElement.getAttribute("endpoint");
+    if (!rawEndpoint) {
+      console.error("Endpoint not found on element!");
+      return;
+    }
+    const url = new URL(rawEndpoint, window.location.origin);
+    const parts = url.pathname.split("/").filter(Boolean);
+    endpointPrefix = parts.length ? `/${parts[0]}/` : rawEndpoint;
   }
+
+  if (!confirm("Do You Want To Uninstall this plugin?")) {
+    return;
+  }
+
+  const controller = navigator.serviceWorker?.controller;
+  if (!controller) {
+    console.error("Service Worker controller is not active!");
+    return;
+  }
+
+  // إغلاق مشغل الإضافة إن كان يعرض نفس البادئة
+  const activeFrame = document.querySelector("#plugin-player iframe");
+  if (activeFrame?.src && new URL(activeFrame.src, window.location.origin).pathname.startsWith(endpointPrefix)) {
+    activeFrame.closest("#plugin-player")?.parentElement?.remove();
+  }
+
+  pluginElement.closest("plugin-info")?.remove() || pluginElement.remove();
+
+  controller.postMessage({
+    type: "DELETE_ZIP",
+    endpointPrefix
+  });
 }
+
 
 // ───────────── مثال على الاستخدام وعرضها في الواجهة ─────────────
 async function renderPluginsList() {
   try {
+    console.log("Rendering....");
     const listContainer = document.getElementById("plugins-list");
-    listContainer.innerHTML = "<p>جاري جلب الإضافات...</p>";
+    listContainer.innerHTML = `<p class="nothingness">you have no installed Plugins 🧩 yet</p>`;
 
     const plugins = await getInstalledPlugins();
     listContainer.innerHTML = ""; // تفريغ القائمة قبل العرض
@@ -768,12 +1052,9 @@ async function renderPluginsList() {
 
   } catch (error) {
     console.error("حدث خطأ أثناء جلب الإضافات:", error.message);
-    document.getElementById("plugins-list").innerHTML = `<p style="color: red;">خطأ في تحميل الإضافات</p>`;
+    alert("حدث خطأ أثناء جلب الإضافات:", error.message);
+    document.getElementById("plugins-list").innerHTML = `<p class="nothingness">you have no installed Plugins 🧩 yet</p>`;
   }
 }
 
-document.addEventListener("readystatechange",()=>{
-  if(document.readyState == "complete") {
-    renderPluginsList();
-  }
-});
+window.addEventListener("load",renderPluginsList);

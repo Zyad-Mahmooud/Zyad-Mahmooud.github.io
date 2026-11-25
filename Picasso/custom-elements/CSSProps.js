@@ -1139,7 +1139,71 @@ var CSSProps = {
     	group: "effects",
     	type: "file",
     	title: "mask image"
+    },
+        insetBlock: {
+    	group: "Layout",
+    	type: "range",
+    	unit: "px",
+    	min: -500,
+    	max: 500,
+    	value: 0,
+    	title: "block inset"
+    },
+    insetBlockEnd: {
+    	group: "Layout",
+    	type: "range",
+    	unit: "px",
+    	min: -500,
+    	max: 500,
+    	value: 0,
+    	title: "block end inset"
+    },
+    insetBlockStart: {
+    	group: "Layout",
+    	type: "range",
+    	unit: "px",
+    	min: -500,
+    	max: 500,
+    	value: 0,
+    	title: "block start inset"
+    },
+    insetInline: {
+    	group: "Layout",
+    	type: "range",
+    	unit: "px",
+    	min: -500,
+    	max: 500,
+    	value: 0,
+    	title: "inline inset"
+    },
+    insetInlineEnd: {
+    	group: "Layout",
+    	type: "range",
+    	unit: "px",
+    	min: -500,
+    	max: 500,
+    	value: 0,
+    	title: "inline end inset"
+    },
+    insetInlineStart: {
+    	group: "Layout",
+    	type: "range",
+    	unit: "px",
+    	min: -500,
+    	max: 500,
+    	value: 0,
+    	title: "inline start inset"
+    },
+    inset: {
+    	group: "Layout",
+    	type: "range",
+    	unit: "px",
+    	min: -500,
+    	max: 500,
+    	value: 0,
+    	title: "inset (all sides)"
     }
+
 };
 const len = Object.keys(CSSProps).filter(prop => !String(prop).includes('_')).length;
 console.log(`There's around ${len} Property, that's ${((len/Object.keys(document.createElement("style").style).length)*100).toFixed(0)}% of the entire CSSOM properties 🤯`);

@@ -139,6 +139,7 @@ Object.keys(window.CSSProps).forEach((prop)=>{
   color:`<div class="ColorSelector"></div>`,
   file:`<div class="file">
   <input prop="backgroundImage" onchange="uploadThatFile(this)" type="file" id="upload-file-for-css-editor"/>
+  <b style="margin-left: 5px;">backgroundImage</b>
   <button onclick="returnClick(this);" class="SelectFile-Btn">Select File</button>
   <button prop="backgroundImage" onclick="removeBG(this)" class="RemoveFile-Btn">
     <p>&times;</p>

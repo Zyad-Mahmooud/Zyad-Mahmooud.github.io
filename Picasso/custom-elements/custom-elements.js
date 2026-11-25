@@ -9,6 +9,14 @@ const EV = (v) => {
     if (typeof window[oninputAttr.split("(")[0]] === "function") {
         window[oninputAttr.split("(")[0]](v); // v هنا كائن مباشر
     }
+    this.querySelectorAll(`[placeholder="value"],[placeholder="custom"]`).forEach((el)=>{
+        if(el) {
+          el.style.color = v.supported ? "white" : "red";
+          setTimeout(function() {
+            el.style.color = "white";
+          }, 400);
+        }
+      });
 };
     // Read attributes safely from the custom element itself
     const min = rangeTag.getAttribute("min") || "0";
@@ -18,6 +26,11 @@ const EV = (v) => {
     const oninputAttr = rangeTag.getAttribute("oninput") || "";
     const Selunit = rangeTag.getAttribute("unit") || "";
     const value = rangeTag.getAttribute("value") || "";
+    const rawTitle = (text && text !== "undefined" && text !== "null")
+  ? text
+  : (property && property !== "undefined" && property !== "null")
+    ? property
+    : "untitled";
 
     // Event Handler helper function
 
@@ -27,10 +40,11 @@ const EV = (v) => {
     
     // Create the HTML structure
     rangeContainer.innerHTML = `
-      <h4 class="range-title golden-text">${(text || property) || "untitled"}</h4>
+      <h4 class="range-title golden-text">${rawTitle}</h4>
       <br><br>
       <input unit="${Selunit}" value="${value}" prop="${property}" min="${min}" max="${max}" type="range">
       <div class="range-settings">
+      <input unit="${Selunit}" class="txy-value step" placeholder="step (0.04)" type="number" id="step">
         <input unit="${Selunit}" class="txy" placeholder="min" type="number" value="${min}">
         <input unit="${Selunit}" class="txy" placeholder="max" type="number" value="${max}">
         <input unit="${Selunit}" class="txy txy-value" prop="${property}" placeholder="value" disabled type="text" value="${value ? value + Selunit : ""}">
@@ -84,7 +98,10 @@ const EV = (v) => {
     const minInput = rangeContainer.querySelector('input[placeholder="min"]');
     const maxInput = rangeContainer.querySelector('input[placeholder="max"]');
     const custom = rangeContainer.querySelector('input[placeholder="custom"]');
-
+    const step = rangeContainer.querySelector('#step');
+    step.addEventListener("input",()=>{
+      rangeInput.setAttribute("step",step.value);
+    });
     unitSelect.value = Selunit;
 
     // Custom input listeners

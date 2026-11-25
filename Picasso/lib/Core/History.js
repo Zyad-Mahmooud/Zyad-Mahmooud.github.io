@@ -428,7 +428,7 @@ var Picasso = {
          console.log(`Picasso History [CSSOM] ~ Rules Collection Rollback`);
             }
           }
-          if(this.current.rule && ! window.parent.CSSEditor.CSSProps[this.current.prop]) {
+          if(this.current && this.current.rule && ! window.parent.CSSEditor.CSSProps[this.current.prop]) {
            if(this.method == "undo") {
              this._writeStyle(this.current.rule.style, this.current.prop, this.current.oldValue);
            }

@@ -1,3 +1,451 @@
+(()=>{
+// ================= GUARDS =================
+let __inNotify = false;
+let __inPicasso = false;
+const PATCHED = Symbol("patched");
+
+function safeGetMatchedRules(node){
+  if(__inNotify || __inPicasso || !node) return undefined;
+  if(typeof Paint==="undefined"||!Paint||typeof Paint.getMatched!=="function") return undefined;
+  try{ return Paint.getMatched(node); }catch(_){ return undefined; }
+}
+function safeNotify(payload){
+  if(__inNotify) return;
+  if(typeof Notification!=="function") return;
+  __inNotify = true;
+  try{ Notification(payload); }catch(e){ console.error("[Notify Error]:",e,payload); }
+  finally{ __inNotify = false; }
+}
+function raw(o){
+  if(!o||typeof o!=="object") return o;
+  return o._target||o.target||o.raw||o.element||o.el||o;
+}
+function getAction(name){
+  if(typeof Picasso!=="undefined" && Picasso.actions && typeof Picasso.actions[name]==="function") return Picasso.actions[name];
+  if(typeof window!=="undefined" && window.Picasso && window.Picasso.actions && typeof window.Picasso.actions[name]==="function") return window.Picasso.actions[name];
+  return null;
+}
+// بينفذ Native وانت قافل Picasso عشان ميعملش Loop
+function runNative(fn, thisArg, args){
+  __inPicasso = true;
+  try{ return fn.apply(thisArg, args); }
+  finally{ __inPicasso = false; }
+}
+// بينفذ Picasso ولو رجع حاجة غلط بيرجع للـ Native
+function runPicassoOrNative(actionName, picassoArgs, nativeFn, nativeThis, nativeArgs, validate){
+  const act = getAction(actionName);
+  if(!act) return runNative(nativeFn, nativeThis, nativeArgs);
+  __inPicasso = true;
+  try{
+    const r = act.apply(nativeThis, picassoArgs);
+    if(validate && !validate(r)){
+      // Picasso مرجعش اللي متوقع منه، ارجع للـ Native
+      return runNative(nativeFn, nativeThis, nativeArgs);
+    }
+    return r;
+  }catch(_){
+    return runNative(nativeFn, nativeThis, nativeArgs);
+  }finally{ __inPicasso = false; }
+}
+function patch(proto, name, wrapper){
+  if(!proto||typeof proto[name]!=="function") return;
+  if(proto[name][PATCHED]) return;
+  const original = proto[name];
+  const fn = wrapper(original);
+  fn[PATCHED] = true;
+  proto[name] = fn;
+}
+function patchSetter(proto, prop, wrapper){
+  const desc = Object.getOwnPropertyDescriptor(proto, prop);
+  if(!desc||typeof desc.set!=="function") return;
+  if(desc.set[PATCHED]) return;
+  const originalSet = desc.set;
+  const originalGet = desc.get;
+  const newSet = function(v){ return wrapper.call(this, originalSet, v); };
+  newSet[PATCHED] = true;
+  Object.defineProperty(proto, prop, { configurable:true, enumerable:desc.enumerable, get:originalGet, set:newSet });
+}
+
+// ================= NATIVE BACKUP =================
+const NodeProto = Node.prototype;
+const ElementProto = Element.prototype;
+const CharacterDataProto = CharacterData.prototype;
+
+// ================= DOM: Node =================
+patch(NodeProto, "appendChild", (original)=>function(child){
+  if(__inPicasso || __inNotify) return original.call(this, child);
+  const p = raw(this), c = raw(child);
+  const prevParent = c?c.parentNode:null, prevNext = c?c.nextSibling:null;
+  const isFrag = c&&c.nodeType===11;
+  const added = isFrag?[...c.childNodes]:[c];
+  const result = runPicassoOrNative("copy", [p,c], original, p, [c], r=>r&&r.nodeType);
+  try{ safeNotify({type:"DOM",trigger:prevParent?"move":"ADD",subTrigger:"appendChild",parent:p,node:result,addedNodes:added,previousParent:prevParent,previousNextSibling:prevNext,addedNodeCSSRules:!isFrag?safeGetMatchedRules(result):[],cssRules:safeGetMatchedRules(p)}); }catch(_){}
+  return result;
+});
+patch(NodeProto, "insertBefore", (original)=>function(child, ref){
+  if(__inPicasso || __inNotify) return original.call(this, child, ref);
+  const p = raw(this), c = raw(child), r = raw(ref);
+  const prevParent = c?c.parentNode:null, prevNext = c?c.nextSibling:null;
+  const isFrag = c&&c.nodeType===11;
+  const added = isFrag?[...c.childNodes]:[c];
+  const result = runPicassoOrNative("copy", [p,c,r], original, p, [c,r], x=>x&&x.nodeType);
+  try{ safeNotify({type:"DOM",trigger:prevParent?"move":"ADD",subTrigger:"insertBefore",parent:p,node:result,addedNodes:added,referenceNode:r,previousParent:prevParent,previousNextSibling:prevNext,cssRules:safeGetMatchedRules(p)}); }catch(_){}
+  return result;
+});
+patch(NodeProto, "removeChild", (original)=>function(child){
+  if(__inPicasso || __inNotify) return original.call(this, child);
+  const p = raw(this), c = raw(child);
+  const prevNext = c?c.nextSibling:null;
+  const result = runPicassoOrNative("del", [c], original, p, [c], x=>x&&x.nodeType) || c;
+  try{ safeNotify({type:"DOM",trigger:"del",subTrigger:"removeChild",targetParent:p,node:result,previousNextSibling:prevNext,addedNodeCSSRules:safeGetMatchedRules(result),cssRules:safeGetMatchedRules(p)}); }catch(_){}
+  return result;
+});
+patch(NodeProto, "replaceChild", (original)=>function(newChild, oldChild){
+  if(__inPicasso || __inNotify) return original.call(this, newChild, oldChild);
+  const p = raw(this), n = raw(newChild), o = raw(oldChild);
+  const prevParent = n?n.parentNode:null, prevNext = o?o.nextSibling:null;
+  // replace = del القديم + copy الجديد
+  const result = runPicassoOrNative("replace", [p,n,o], original, p, [n,o], x=>x&&x.nodeType) || o;
+  try{ safeNotify({type:"DOM",trigger:"replace",subTrigger:"replaceChild",parent:p,node:result,newNode:n,oldNode:o,previousParent:prevParent,previousNextSibling:prevNext,cssRules:safeGetMatchedRules(p)}); }catch(_){}
+  return result;
+});
+patch(NodeProto, "cloneNode", (original)=>function(deep){
+  if(__inPicasso || __inNotify) return original.call(this, deep);
+  const result = runPicassoOrNative("copy", [raw(this), deep], original, raw(this), [deep], x=>x&&x.nodeType);
+  try{ safeNotify({type:"DOM",trigger:"clone",subTrigger:"cloneNode",source:raw(this),clone:result,deep:!!deep,addedNodeCSSRules:safeGetMatchedRules(result)}); }catch(_){}
+  return result;
+});
+
+// ================= DOM: ParentNode append / prepend =================
+[ElementProto, Document.prototype, DocumentFragment.prototype].forEach(proto=>{
+  patch(proto, "append", (original)=>function(...children){
+    if(__inPicasso || __inNotify) return original.call(this, ...children);
+    const p = raw(this), rawChildren = children.map(raw);
+    runPicassoOrNative("copy", [p, ...rawChildren], original, p, rawChildren, ()=>true);
+    try{ safeNotify({type:"DOM",trigger:"ADD",subTrigger:"append",parent:p,addedNodes:rawChildren,cssRules:safeGetMatchedRules(p)}); }catch(_){}
+  });
+  patch(proto, "prepend", (original)=>function(...children){
+    if(__inPicasso || __inNotify) return original.call(this, ...children);
+    const p = raw(this), rawChildren = children.map(raw);
+    runPicassoOrNative("copy", [p, ...rawChildren], original, p, rawChildren, ()=>true);
+    try{ safeNotify({type:"DOM",trigger:"ADD",subTrigger:"prepend",parent:p,addedNodes:rawChildren,cssRules:safeGetMatchedRules(p)}); }catch(_){}
+  });
+});
+
+// ================= DOM: ChildNode =================
+[ElementProto, CharacterDataProto, DocumentType.prototype].forEach(proto=>{
+  patch(proto, "before", (original)=>function(...nodes){
+    if(__inPicasso || __inNotify) return original.call(this, ...nodes);
+    const p = raw(this);
+    runPicassoOrNative("copy", [p, ...nodes.map(raw)], original, p, nodes.map(raw), ()=>true);
+    try{ safeNotify({type:"DOM",trigger:"ADD",subTrigger:"before",target:p,addedNodes:nodes.map(raw)}); }catch(_){}
+  });
+  patch(proto, "after", (original)=>function(...nodes){
+    if(__inPicasso || __inNotify) return original.call(this, ...nodes);
+    const p = raw(this);
+    runPicassoOrNative("copy", [p, ...nodes.map(raw)], original, p, nodes.map(raw), ()=>true);
+    try{ safeNotify({type:"DOM",trigger:"ADD",subTrigger:"after",target:p,addedNodes:nodes.map(raw)}); }catch(_){}
+  });
+  patch(proto, "replaceWith", (original)=>function(...nodes){
+    if(__inPicasso || __inNotify) return original.call(this, ...nodes);
+    const p = raw(this), prevNext = p.nextSibling;
+    runPicassoOrNative("replace", [p, ...nodes.map(raw)], original, p, nodes.map(raw), ()=>true);
+    try{ safeNotify({type:"DOM",trigger:"replace",subTrigger:"replaceWith",target:p,newNodes:nodes.map(raw),previousNextSibling:prevNext}); }catch(_){}
+  });
+  patch(proto, "remove", (original)=>function(){
+    if(__inPicasso || __inNotify) return original.call(this);
+    const p = raw(this), parent = p.parentNode, prevNext = p.nextSibling;
+    runPicassoOrNative("del", [p], original, p, [], ()=>true);
+    try{ safeNotify({type:"DOM",trigger:"del",subTrigger:"remove",node:p,parent,previousNextSibling:prevNext,addedNodeCSSRules:safeGetMatchedRules(p),cssRules:safeGetMatchedRules(parent)}); }catch(_){}
+  });
+});
+
+// ================= DOM: insertAdjacent =================
+patch(ElementProto, "insertAdjacentElement", (original)=>function(pos, el){
+  if(__inPicasso || __inNotify) return original.call(this, pos, el);
+  const p = raw(this), e = raw(el);
+  const result = runPicassoOrNative("copy", [p,e,pos], original, p, [pos,e], x=>x&&x.nodeType);
+  try{ safeNotify({type:"DOM",trigger:"ADD",subTrigger:"insertAdjacentElement",parent:p,node:result,position:pos}); }catch(_){}
+  return result;
+});
+patch(ElementProto, "insertAdjacentHTML", (original)=>function(pos, html){
+  if(__inPicasso || __inNotify) return original.call(this, pos, html);
+  const p = raw(this);
+  runPicassoOrNative("copy", [p,html,pos], original, p, [pos,html], ()=>true);
+  try{ safeNotify({type:"DOM",trigger:"ADD",subTrigger:"insertAdjacentHTML",parent:p,position:pos,html,cssRules:safeGetMatchedRules(p)}); }catch(_){}
+  return undefined;
+});
+patch(ElementProto, "insertAdjacentText", (original)=>function(pos, text){
+  if(__inPicasso || __inNotify) return original.call(this, pos, text);
+  const p = raw(this);
+  runPicassoOrNative("copy", [p,text,pos], original, p, [pos,text], ()=>true);
+  try{ safeNotify({type:"DOM",trigger:"ADD",subTrigger:"insertAdjacentText",parent:p,position:pos,text}); }catch(_){}
+  return undefined;
+});
+
+// ================= DOM: Attributes =================
+patch(ElementProto, "setAttribute", (original)=>function(name, value){
+  if(__inPicasso || __inNotify) return original.call(this, name, value);
+  const el = raw(this), attr = String(name);
+  const had = el.hasAttribute(attr), oldValue = el.getAttribute(attr);
+  runPicassoOrNative("copy", [el, attr, value], original, el, [name, value], ()=>true);
+  try{ safeNotify({type:"DOM",trigger:had?"attr-update":"attr-add",subTrigger:"setAttribute",target:el,attrName:attr,oldValue,newValue:String(value),cssRules:safeGetMatchedRules(el)}); }catch(_){}
+});
+patch(ElementProto, "removeAttribute", (original)=>function(name){
+  if(__inPicasso || __inNotify) return original.call(this, name);
+  const el = raw(this), attr = String(name);
+  const had = el.hasAttribute(attr), oldValue = el.getAttribute(attr);
+  runPicassoOrNative("del", [el, attr], original, el, [name], ()=>true);
+  if(had) try{ safeNotify({type:"DOM",trigger:"attr-del",subTrigger:"removeAttribute",target:el,attrName:attr,oldValue,cssRules:safeGetMatchedRules(el)}); }catch(_){}
+});
+patch(ElementProto, "setAttributeNode", (original)=>function(attrNode){
+  if(__inPicasso || __inNotify) return original.call(this, attrNode);
+  const el = raw(this);
+  const result = runPicassoOrNative("copy", [el, attrNode], original, el, [raw(attrNode)], ()=>true) || el.getAttributeNode(attrNode.name);
+  try{ safeNotify({type:"DOM",trigger:"attr-add",subTrigger:"setAttributeNode",target:el,attrNode:result}); }catch(_){}
+  return result;
+});
+patch(ElementProto, "removeAttributeNode", (original)=>function(attrNode){
+  if(__inPicasso || __inNotify) return original.call(this, attrNode);
+  const el = raw(this);
+  const result = runPicassoOrNative("del", [el, attrNode], original, el, [raw(attrNode)], ()=>true) || raw(attrNode);
+  try{ safeNotify({type:"DOM",trigger:"attr-del",subTrigger:"removeAttributeNode",target:el,attrNode:result}); }catch(_){}
+  return result;
+});
+patch(ElementProto, "toggleAttribute", (original)=>function(name, force){
+  if(__inPicasso || __inNotify) return original.call(this, name, force);
+  const el = raw(this), attr = String(name), oldValue = el.getAttribute(attr);
+  runPicassoOrNative("copy", [el, attr, force], original, el, [name, force], ()=>true);
+  const result = el.hasAttribute(attr);
+  try{ safeNotify({type:"DOM",trigger:result?"attr-add":"attr-del",subTrigger:"toggleAttribute",target:el,attrName:attr,oldValue,force}); }catch(_){}
+  return result;
+});
+
+// ================= DOM: classList =================
+["add","remove","toggle","replace"].forEach(m=>{
+  patch(DOMTokenList.prototype, m, (original)=>function(...args){
+    if(__inPicasso || __inNotify) return original.call(this, ...args);
+
+    // this هنا = DOMTokenList، مش العنصر
+    const list = this;
+    const owner = list.ownerElement; // ده الأب الحقيقي
+    const before = list.value;
+
+    const action = (m==="remove") ? "del" : "copy";
+
+    // Picasso لازم ياخد الـ owner كـ this، مش الـ list
+    // والـ Native لازم ياخد الـ list كـ this
+    runPicassoOrNative(action, [owner, m, ...args], original, list, args, ()=>true);
+
+    try{
+      safeNotify({
+        type:"DOM",
+        trigger:"class",
+        subTrigger:"classList."+m,
+        target: owner, // الأب، مش الـ list
+        tokenList: list,
+        args,
+        oldValue: before,
+        newValue: list.value,
+        cssRules: owner ? safeGetMatchedRules(owner) : undefined
+      });
+    }catch(_){}
+
+    // toggle و replace بيرجعوا boolean، add و remove بيرجعوا undefined
+    if(m==="toggle") return list.contains(args[0]);
+    if(m==="replace") return list.contains(args[1]);
+    return undefined;
+  });
+});
+
+// ================= DOM: Setters =================
+patchSetter(NodeProto, "textContent", function(originalSet, v){
+  if(__inPicasso || __inNotify){ runNative(originalSet, this, [v]); return; }
+  const el = raw(this), oldValue = el.textContent;
+  runPicassoOrNative("replace", [el, v], originalSet, el, [v], ()=>true);
+  try{ safeNotify({type:"DOM",trigger:"text",subTrigger:"textContent",target:el,oldValue,newValue:String(v)}); }catch(_){}
+});
+patchSetter(ElementProto, "innerHTML", function(originalSet, v){
+  if(__inPicasso || __inNotify){ runNative(originalSet, this, [v]); return; }
+  const el = raw(this), oldValue = el.innerHTML;
+  runPicassoOrNative("replace", [el, v], originalSet, el, [v], ()=>true);
+  try{ safeNotify({type:"DOM",trigger:"html",subTrigger:"innerHTML",target:el,oldValue,newValue:String(v),cssRules:safeGetMatchedRules(el)}); }catch(_){}
+});
+patchSetter(ElementProto, "outerHTML", function(originalSet, v){
+  if(__inPicasso || __inNotify){ runNative(originalSet, this, [v]); return; }
+  const el = raw(this), parent = el.parentNode, prevNext = el.nextSibling;
+  runPicassoOrNative("replace", [el, v], originalSet, el, [v], ()=>true);
+  try{ safeNotify({type:"DOM",trigger:"replace",subTrigger:"outerHTML",target:el,parent,previousNextSibling:prevNext,newValue:String(v)}); }catch(_){}
+});
+
+// ================= CSSOM =================
+function patchRuleContainer(proto){
+  if(!proto) return;
+  patch(proto, "insertRule", (original)=>function(ruleText, index){
+    if(__inPicasso || __inNotify) return original.call(this, ruleText, index);
+    const sheet = raw(this);
+    const idx = index===undefined ? sheet.cssRules.length : index;
+    const result = runPicassoOrNative("copy", [sheet, ruleText, idx], original, sheet, [ruleText, idx], r=>typeof r==="number");
+    const newRule = sheet.cssRules ? sheet.cssRules[result] : undefined;
+    try{ safeNotify({type:"CSSOM",trigger:"ADD",subTrigger:"insertRule",targetSheet:sheet,index:result,newRule,newRuleText:ruleText}); }catch(_){}
+    return result;
+  });
+  patch(proto, "deleteRule", (original)=>function(index){
+    if(__inPicasso || __inNotify) return original.call(this, index);
+    const sheet = raw(this);
+    const deletedRule = sheet.cssRules ? sheet.cssRules[index] : undefined;
+    const deletedText = deletedRule ? deletedRule.cssText : undefined;
+    runPicassoOrNative("del", [sheet, index, deletedRule], original, sheet, [index], ()=>true);
+    try{ safeNotify({type:"CSSOM",trigger:"del",subTrigger:"deleteRule",targetSheet:sheet,index,deletedRule,deletedRuleText:deletedText}); }catch(_){}
+  });
+}
+patchRuleContainer(CSSStyleSheet.prototype);
+if(typeof CSSGroupingRule!=="undefined") patchRuleContainer(CSSGroupingRule.prototype);
+if(typeof CSSMediaRule!=="undefined") patchRuleContainer(CSSMediaRule.prototype);
+if(typeof CSSSupportsRule!=="undefined") patchRuleContainer(CSSSupportsRule.prototype);
+if(typeof CSSLayerBlockRule!=="undefined") patchRuleContainer(CSSLayerBlockRule.prototype);
+if(typeof CSSContainerRule!=="undefined") patchRuleContainer(CSSContainerRule.prototype);
+
+patch(CSSStyleSheet.prototype, "replace", (original)=>function(text){
+  if(__inPicasso || __inNotify) return original.call(this, text);
+  const sheet = raw(this);
+  runPicassoOrNative("replace", [sheet, text], original, sheet, [text], ()=>true);
+  try{ safeNotify({type:"CSSOM",trigger:"replace",subTrigger:"replace",targetSheet:sheet,text}); }catch(_){}
+  return Promise.resolve(sheet);
+});
+patch(CSSStyleSheet.prototype, "replaceSync", (original)=>function(text){
+  if(__inPicasso || __inNotify) return original.call(this, text);
+  const sheet = raw(this);
+  runPicassoOrNative("replace", [sheet, text], original, sheet, [text], ()=>true);
+  try{ safeNotify({type:"CSSOM",trigger:"replace",subTrigger:"replaceSync",targetSheet:sheet,text}); }catch(_){}
+});
+
+patch(CSSStyleDeclaration.prototype, "setProperty", (original)=>function(prop, value, priority){
+  if(__inPicasso || __inNotify) return original.call(this, prop, value, priority);
+  const decl = raw(this), name = String(prop);
+  const oldValue = decl.getPropertyValue(name), oldPriority = decl.getPropertyPriority(name);
+  runPicassoOrNative("copy", [decl, name, value, priority], original, decl, [prop, value, priority], ()=>true);
+  try{ safeNotify({type:"CSSOM",trigger:"style",subTrigger:"setProperty",rule:decl.parentRule||null,parentStyleSheet:decl.parentRule?decl.parentRule.parentStyleSheet:null,prop:name,oldValue,Value:value!=null?String(value):"",oldPriority,Priority:priority?String(priority):""}); }catch(_){}
+});
+patch(CSSStyleDeclaration.prototype, "removeProperty", (original)=>function(prop){
+  if(__inPicasso || __inNotify) return original.call(this, prop);
+  const decl = raw(this), name = String(prop);
+  const oldValue = decl.getPropertyValue(name), oldPriority = decl.getPropertyPriority(name);
+  const result = runPicassoOrNative("del", [decl, name], original, decl, [prop], ()=>true);
+  try{ safeNotify({type:"CSSOM",trigger:"style-del",subTrigger:"removeProperty",targetStyle:decl,parentRule:decl.parentRule||null,property:name,oldValue,oldPriority,removedValue:result}); }catch(_){}
+  return result;
+});
+patchSetter(CSSStyleDeclaration.prototype, "cssText", function(originalSet, v){
+  if(__inPicasso || __inNotify){ runNative(originalSet, this, [v]); return; }
+  const decl = raw(this), oldValue = decl.cssText;
+  runPicassoOrNative("replace", [decl, v], originalSet, decl, [v], ()=>true);
+  try{ safeNotify({type:"CSSOM",trigger:"style",subTrigger:"cssText",targetStyle:decl,parentRule:decl.parentRule||null,oldValue,newValue:String(v)}); }catch(_){}
+});
+})();
+(()=>{
+let __inNotify = false;
+let __inPicasso = false;
+
+function safeGetMatchedRules(node){
+  if(__inNotify || __inPicasso || !node) return undefined;
+  if(typeof Paint==="undefined"||!Paint||typeof Paint.getMatched!=="function") return undefined;
+  try{ return Paint.getMatched(node); }catch(_){ return undefined; }
+}
+function safeNotify(payload){
+  if(__inNotify) return;
+  if(typeof Notification!=="function") return;
+  __inNotify = true;
+  try{ Notification(payload); }catch(e){ console.error("[Notify Error]:",e,payload); }
+  finally{ __inNotify = false; }
+}
+function getAction(name){
+  if(typeof Picasso!=="undefined" && Picasso.actions && typeof Picasso.actions[name]==="function") return Picasso.actions[name];
+  if(typeof window!=="undefined" && window.Picasso && window.Picasso.actions && typeof window.Picasso.actions[name]==="function") return window.Picasso.actions[name];
+  return null;
+}
+function raw(o){
+  if(!o||typeof o!=="object") return o;
+  return o._target||o.target||o.raw||o.element||o.el||o;
+}
+
+const NativeSetProp = CSSStyleDeclaration.prototype.setProperty;
+const NativeRemoveProp = CSSStyleDeclaration.prototype.removeProperty;
+
+// ================= setProperty = actions.copy =================
+CSSStyleDeclaration.prototype.setProperty = function(prop, value, priority){
+  if(__inPicasso || __inNotify) return NativeSetProp.call(this, prop, value, priority);
+
+  const decl = raw(this);
+  const name = String(prop);
+  const oldValue = decl.getPropertyValue(name);
+  const oldPriority = decl.getPropertyPriority(name);
+  const copy = getAction("copy");
+
+  __inPicasso = true;
+  try{
+    if(copy) copy.call(this, decl, name, value, priority);
+    else NativeSetProp.call(decl, prop, value, priority);
+  }catch(_){
+    // لو Picasso ضرب، اعمل Native عشان الستايل ميتكسرش
+    NativeSetProp.call(decl, prop, value, priority);
+  }finally{ __inPicasso = false; }
+
+  try{
+    safeNotify({
+      type:"CSSOM",
+      trigger:"style",
+      subTrigger:"setProperty",
+      targetStyle: decl,
+      rule: decl.parentRule || null,
+      parentStyleSheet: decl.parentRule ? decl.parentRule.parentStyleSheet : null,
+      prop: name,
+      oldValue,
+      Value: value!=null ? String(value) : "",
+      oldPriority,
+      Priority: priority ? String(priority) : "",
+      addedNodeCSSRules: decl.parentRule ? safeGetMatchedRules(decl.parentRule) : undefined
+    });
+  }catch(_){}
+
+  // setProperty في الأصل بترجع undefined، فمترجعش حاجة
+};
+
+// ================= removeProperty = actions.del =================
+CSSStyleDeclaration.prototype.removeProperty = function(prop){
+  if(__inPicasso || __inNotify) return NativeRemoveProp.call(this, prop);
+
+  const decl = raw(this);
+  const name = String(prop);
+  const oldValue = decl.getPropertyValue(name);
+  const oldPriority = decl.getPropertyPriority(name);
+  const del = getAction("del");
+
+  __inPicasso = true;
+  try{
+    if(del) del.call(this, decl, name);
+    else NativeRemoveProp.call(decl, prop);
+  }catch(_){
+    NativeRemoveProp.call(decl, prop);
+  }finally{ __inPicasso = false; }
+
+  try{
+    safeNotify({
+      type:"CSSOM",
+      trigger:"style-del",
+      subTrigger:"removeProperty",
+      targetStyle: decl,
+      parentRule: decl.parentRule || null,
+      property: name,
+      oldValue,
+      oldPriority,
+      removedValue: oldValue
+    });
+  }catch(_){}
+
+  // removeProperty لازم ترجع الـ oldValue، مش undefined
+  return oldValue;
+};
+})();
 function newClasses(ref,parent) {
   if(!ref) return;
   return Paint.deepCloneNodeWithStyles(ref,parent);
@@ -94,27 +542,7 @@ if (e.target.hasAttribute("data-function")) {
     return;
   }
   FBallTarget = e.target;
-    window.parent.Objects.targetElement = new Proxy(e.target,{
-        get: (t,p) => {
-          return t[p];
-        },
-        set: (t,p,v) => {
-          try {
-            var oldValue = t[p];
-              Notification({
-                target: t,
-                prop: p,
-                value: v,
-                oldValue,
-                trigger: "property",
-                type: "DOM"
-              });
-          t[p] = v;
-          } catch (e) {
-            alert("DOM Error"+e);
-          }
-        }
-      });
+    window.parent.Objects.targetElement = e.target;
   let shorthand;
   let this_props = {};
 
@@ -199,26 +627,7 @@ const forbidden = ["height","width"]; // because of getComputedStyle returns val
     }
   }
 if (e.target.tagName == "HTML") {
-    window.parent.Objects.targetElement = new Proxy(document.body,{
-        get: (t,p) => {
-          return t[p];
-        },
-        set: (t,p,v) => {
-          try {
-            Notification({
-                target: t,
-                prop: p,
-                value: v,
-                oldValue,
-                trigger: "property",
-                type: "DOM"
-              });
-          t[p] = v;
-          } catch (e) {
-            alert("DOM Error"+e);
-          }
-        }
-      });
+    window.parent.Objects.targetElement = document.body;
     window.parent.Objects.targetRule = Paint.getCSSObj(`.${document.body.classList[0]}`, {
       Create: true
     });
@@ -242,23 +651,7 @@ document.body.addEventListener("input",(e)=> {
   if((!e.target.hasAttribute("data-function") || (!window.parent.Shorthands?.[tag]))) {
     return;
   }
-  window.parent.Objects.targetElement = new Proxy(e.target,{
-        get: (t,p) => {
-          return t[p];
-        },
-        set: (t,p,v) => {
-          var oldValue = t[p];
-              Notification({
-                target: t,
-                prop: p,
-                value: v,
-                oldValue,
-                trigger: "property",
-                type: "DOM"
-              });
-          t[p] = v;
-          }
-      });
+  window.parent.Objects.targetElement = e.target;
     let el = e.target;
     let tag = el.tagName.toLowerCase();
     let shorthand;
@@ -338,11 +731,16 @@ Q.outerHTML = Q.innerHTML;
 event.preventDefault();
 });
 window.returnBackupSheet = returnBackupSheet;
+
 (function () {
-  window.parent.functionsList = [];
-  
-  const onChange = (callback) => {
-    if (!window.parent.functionsList.includes(callback)) window.parent.functionsList.push(callback);
+  if(!window.parent.functionsList) {
+      window.parent.functionsList = [];
+}
+  function onChange(callback) {
+    window.parent.functionsList.push(callback);
+  }
+  onChange.toString = function() {
+    return `[Picasso Core]`;
   };
   window.onChange = onChange;
   window.parent.onChange = onChange;
@@ -364,36 +762,60 @@ window.returnBackupSheet = returnBackupSheet;
     });
     let stylesMap = { primary: null };
     window.createStyleProxy = function(obj) {
-      if(obj) {
-        return new Proxy(obj, {
+  if (obj) {
+    return new Proxy(obj, {
       set: (t, p, v) => {
-        Notification({
-            type: 'CSSOM',
-            target: e.target,
-            cssRules: Paint.getMatched(e.target,{
-      ignore: [
-       Paint.getSheetRoot("items.css"),
-       Paint.getSheetRoot("Components.css"),
-       Paint.getSheetRoot("defaults.css"),
-       Paint.getSheetRoot("none.css"),
-       Paint.getSheetRoot("reset.css"),
-       ]
-    }),
-            prop: p,
-            value: v,
-            oldValue: t[p],
-            rule: t.parentRule,
-            event: e,
-            trigger: window.parent.Objects.trigger ? window.parent.Objects.trigger : "unknown",
-            propType: returnType(p)
-          });
+        const oldValue = t[p];
         t[p] = v;
+
+        const ev = typeof e !== "undefined" ? e : null;
+        const targetEl = ev ? ev.target : null;
+        const hasPaint = typeof Paint !== "undefined" && typeof Paint.getMatched === "function";
+        const matchedRules =
+          targetEl && hasPaint
+            ? Paint.getMatched(targetEl, {
+                ignore: [
+                  Paint.getSheetRoot("items.css"),
+                  Paint.getSheetRoot("Components.css"),
+                  Paint.getSheetRoot("defaults.css"),
+                  Paint.getSheetRoot("none.css"),
+                  Paint.getSheetRoot("reset.css"),
+                ]
+              })
+            : undefined;
+        const triggerSource =
+          window.parent && window.parent.Objects && window.parent.Objects.trigger
+            ? window.parent.Objects.trigger
+            : "unknown";
+        const propTypeVal = typeof returnType === "function" ? returnType(p) : undefined;
+
+        const payload = {
+          type: 'CSSOM',
+          target: targetEl,
+          cssRules: matchedRules,
+          prop: p,
+          value: v,
+          oldValue,
+          rule: t.parentRule,
+          event: ev,
+          trigger: triggerSource,
+          propType: propTypeVal
+        };
+
+        if (typeof Notification === "function") {
+          Notification(payload);
+        }
         return true;
       },
-      get: (t, p) => t[p] 
-    });
+      get: (t, p) => {
+        const val = t[p];
+        const isFunc = typeof val === "function";
+        return isFunc ? val.bind(t) : val;
       }
-    };
+    });
+  }
+};
+
     window.parent.createStyleProxy = createStyleProxy;
     if (!matchedRules.length || !matchedRules[0].rule) {
         if(!e.target.classList.length) e.target.classList.add(`${e.target.tagName.toLowerCase()}-${Date.now()}`);
@@ -403,23 +825,7 @@ window.returnBackupSheet = returnBackupSheet;
     }
 
     window.parent.Objects = {
-      targetElement: new Proxy(e.target,{
-        get: (t,p) => {
-          return t[p];
-        },
-        set: (t,p,v) => {
-          const oldValue = t[p];
-          Notification({
-                target: t,
-                prop: p,
-                value: v,
-                oldValue,
-                trigger: "property",
-                type: "DOM"
-              });
-          t[p] = v;
-          }
-        }),
+      targetElement: e.target,
       targetRule: createStyleProxy(stylesMap.primary),
       cssRules: Paint.getMatched(e.target,{
       ignore: [
@@ -448,8 +854,18 @@ for (key in el) {
   if (evtType === "drop") {
     setTimeout(() => {
       Notification({
+        type: ev.type,
+        target: ev.target,
         event:ev,
-        type: ev.type
+        cssRules: Paint.getMatched(ev.target,{
+      ignore: [
+       Paint.getSheetRoot("items.css"),
+       Paint.getSheetRoot("Components.css"),
+       Paint.getSheetRoot("defaults.css"),
+       Paint.getSheetRoot("none.css"),
+       Paint.getSheetRoot("reset.css"),
+       ]
+    })
       });
     }, 10);
     
@@ -457,8 +873,9 @@ for (key in el) {
   }
   main(ev);
   Notification({
-        event:ev,
         type: ev.type,
+        target: ev.target,
+        event:ev,
         cssRules: Paint.getMatched(ev.target,{
       ignore: [
        Paint.getSheetRoot("items.css"),

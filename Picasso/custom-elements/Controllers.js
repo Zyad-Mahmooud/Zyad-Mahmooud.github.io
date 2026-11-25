@@ -1,218 +1,15 @@
 function initControllers() {
-insertController({
-  section: "Shading",
-  html: `
-    <div class="DropShadow-app">
-      <h3>drop-shadow</h3>
-      <range-input unit="px" range-input="true" min="0" max="1000" title="offsetX" data-prop="offsetX"></range-input>
-      <range-input unit="px" range-input="true" min="0" max="1000" title="offsetY" data-prop="offsetY"></range-input>
-      <range-input unit="px" range-input="true" min="0" max="200" title="blurRadius" data-prop="blurRadius"></range-input>
-      <br>
-      <b>Color:</b>
-      <div data-prop="shadowColor" class="ColorSelector"></div><br>
-      <button class="deDropShadow">&times;</button>
-    </div>
-  `,
-  css: `
-    .DropShadow-app {
-      color: #E6E1DC;
-      background-color: #202020;
-      margin-top: 5px;
-      width: 89%;
-      padding: 10px;
-      border-radius: 5px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      gap: 8px;
-    }
-    .deDropShadow {
-      background: linear-gradient(gold,orange,gold);
-      border: none;
-      width: 30px;
-      font-size: 16px;
-      height: 30px;
-      border-radius: 8px;
-    }
-  `,
-  onChange: function(element) {
-    // قراءة القيم من السلايدرز
-    const values = element.querySelectorAll('input[placeholder="value"]');
-    const offsetX = values[0].value || 0;
-    const offsetY = values[1].value || 0;
-    const blur = values[2].value || 0;
 
-    // اللون من ColorSelector
-    const colorElement = element.querySelector('div[data-prop="shadowColor"]');
-    // استخدم خاصية 'style.backgroundColor' مباشرة إن وجدت، وإلا استخدم 'getComputedStyle' كخيار احتياطي
-    const color = colorElement.style.backgroundColor || getComputedStyle(colorElement).backgroundColor;
-
-    // إنشاء قيمة الفلتر مع وحدات px
-    const filterValue = `drop-shadow(${offsetX} ${offsetY} ${blur} ${color})`;
-    // تطبيقها على العنصر المستهدف
-    if (window.parent.Objects) {
-      window.parent.Objects.targetRule.filter = filterValue;
-    }
-  },
-  onLoad: function(element) {
-    element.querySelector(".deDropShadow").addEventListener("click", () => {
-      if (window.parent.Objects) {
-        window.parent.Objects.targetRule.removeProperty("filter");
-      }
-      // reset القيم
-      element.querySelector('div[data-prop="shadowColor"]').removeAttribute("style");
-      element.querySelectorAll('input[type="range"]').forEach(r => r.value = "0");
-      element.querySelectorAll('input[placeholder="value"]').forEach(r => r.value = "0");
-    });
-  }
-});
-insertController({
-  section: "Shading",
-  html: `
-    <div class="TextShadow-app">
-      <h3>text-shadow</h3>
-      <range-input unit="px" range-input="true" min="0" max="50" title="offsetX" data-prop="offsetX"></range-input>
-      <range-input unit="px" range-input="true" min="0" max="50" title="offsetY" data-prop="offsetY"></range-input>
-      <range-input unit="px" range-input="true" min="0" max="100" title="blurRadius" data-prop="blurRadius"></range-input>
-      <br>
-      <b>Color:</b>
-      <div data-prop="shadowColor" class="ColorSelector"></div><br>
-      <button class="deTextShadow">&times;</button>
-    </div>
-  `,
-  css: `
-    .TextShadow-app {
-      color: #E6E1DC;
-      background-color: #202020;
-      margin-top: 5px;
-      padding: 8px;
-      border-radius: 5px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      align-items: center;
-      align-content: center;
-      justify-content: center;
-      justify-items: center;
-      width:85%;
-    }
-    .deTextShadow {
-      background: linear-gradient(gold, orange, gold);
-      border: none;
-      width: 30px;
-      font-size: 16px;
-      height: 30px;
-      border-radius: 8px;
-    }
-  `,
-  onLoad: function(container) {
-    container.querySelector(".deTextShadow").addEventListener("click", () => {
-      if (window.parent.Objects) {
-        window.parent.Objects.targetRule.removeProperty("text-shadow");
-      }
-      container.querySelector('div[data-prop="shadowColor"]').removeAttribute("style");
-      container.querySelectorAll('input[type="range"]').forEach(r => r.value = "0");
-      container.querySelectorAll('input[placeholder="value"]').forEach(r => r.value = "0");
-    });
-  },
-  onChange: function(container) {
-    let inputs = container.querySelectorAll('input[placeholder="value"]');
-    let offsetX = inputs[0].value || 0;
-    let offsetY = inputs[1].value || 0;
-    let blur = inputs[2].value || 0;
-    
-    // استخدم خاصية 'style.backgroundColor' مباشرة إن وجدت، وإلا استخدم 'getComputedStyle' كخيار احتياطي
-    const colorElement = container.querySelector('div[data-prop="shadowColor"]');
-    let color = colorElement.style.backgroundColor || getComputedStyle(colorElement).backgroundColor;
-
-    // ✨ الإصلاح: إضافة وحدات 'px' لقيم الإزاحة والتمويه.
-    let shadow = `${offsetX} ${offsetY} ${blur} ${color}`;
-    if (window.parent.Objects) {
-      window.parent.Objects.targetRule.textShadow = shadow;
-    }
-  }
-});
-insertController({
-  section: "Shading",
-  html: `
-    <div class="BoxShadow-app">
-      <h3>box-shadow</h3>
-      <range-input unit="px" range-input="true" min="0" max="50" title="offsetX" prop="offsetX" data-prop="offsetX"></range-input>
-      <range-input unit="px" range-input="true" min="0" max="50" title="offsetY" data-prop="offsetY"></range-input>
-      <range-input unit="px" range-input="true" min="0" max="100" title="blurRadius" data-prop="blurRadius"></range-input>
-      <br>
-      <b>Color:</b>
-      <div data-prop="shadowColor" class="ColorSelector"></div><br>
-      <label>inset:</lable><input type="checkbox" id="insetCheck"><br>
-      <button class="deBoxShadow">&times;</button>
-    </div>
-  `,
-  css: `
-    .BoxShadow-app {
-      color: #E6E1DC;
-      background-color: #202020;
-      margin-top: 5px;
-      padding: 8px;
-      border-radius: 5px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      align-items: center;
-      align-content: center;
-      justify-content: center;
-      justify-items: center;
-      width:85%;
-    }
-    .deBoxShadow {
-      background: linear-gradient(gold, orange, gold);
-      border: none;
-      width: 30px;
-      font-size: 16px;
-      height: 30px;
-      border-radius: 8px;
-    }
-  `,
-  onLoad: function(container) {
-    container.querySelector(".deBoxShadow").addEventListener("click", () => {
-      // إزالة خاصية box-shadow عند الضغط على زر الإلغاء
-      if (window.parent.Objects) {
-        window.parent.Objects.targetRule.removeProperty("box-shadow");
-      }
-      // إعادة تعيين القيم
-      container.querySelector('div[data-prop="shadowColor"]').removeAttribute("style");
-      container.querySelectorAll('input[type="range"]').forEach(r => r.value = "0");
-      container.querySelectorAll('input[placeholder="value"]').forEach(r => r.value = "0");
-    });
-  },
-  onChange: function(container) {
-    let inputs = container.querySelectorAll('input[placeholder="value"]');
-    let offsetX = inputs[0].value || 0;
-    let offsetY = inputs[1].value || 0;
-    let blur = inputs[2].value || 0;
-    
-    // قراءة قيمة اللون
-    const colorElement = container.querySelector('div[data-prop="shadowColor"]');
-    let color = colorElement.style.backgroundColor || getComputedStyle(colorElement).backgroundColor;
-
-    // إنشاء قيمة الظل مع وحدات 'px'
-    let shadow = `${offsetX} ${offsetY} ${blur} ${color}${container.querySelector("#insetCheck").checked ? " inset" : ""}`;
-    // تطبيقها على خاصية boxShadow
-    if (window.parent.Objects) {
-      window.parent.Objects.targetRule.boxShadow = shadow;
-    }
-  }
-});
 insertController({
 	section:"effects",
 	html:`
 	<div>
 	<h3>filter</h3>
-		<range-input unit="px" range-input="true" min="0" max="100" value="0" title="blur" data-prop="blur" prop="blur"></range-input>
-		<range-input unit="%" range-input="true" min="0" max="200" value="0" title="brightness" data-prop="brightness" prop="brightness"></range-input>
-		<range-input unit="%" range-input="true" min="0" max="200" value="0" title="contrast" data-prop="contrast" prop="contrast"></range-input>
-		<range-input unit="%" range-input="true" min="0" max="100" value="0" title="grayscale" data-prop="grayscale" prop="grayscale"></range-input>
-		<range-input unit="%" range-input="true" min="0" max="100" value="0" title="sepia" data-prop="sepia" prop="sepia"></range-input>
+		<range-input unit="px" min="0" max="100" value="0" title="blur" data-prop="blur" prop="blur"></range-input>
+		<range-input unit="%" min="0" max="200" value="0" title="brightness" data-prop="brightness" prop="brightness"></range-input>
+		<range-input unit="%" min="0" max="200" value="0" title="contrast" data-prop="contrast" prop="contrast"></range-input>
+		<range-input unit="%" min="0" max="100" value="0" title="grayscale" data-prop="grayscale" prop="grayscale"></range-input>
+		<range-input unit="%" min="0" max="100" value="0" title="sepia" data-prop="sepia" prop="sepia"></range-input>
 		<button class="resetFilters">&times;</button>
 	</div>
 	`,
@@ -253,11 +50,11 @@ insertController({
 	html:`
 	<div>
 	<h3>backdrop-filter</h3>
-		<range-input unit="px" range-input="true" min="0" max="100" value="0" title="blur" data-prop="blur" prop="blur"></range-input>
-	<range-input unit="%" range-input="true" min="0" max="200" value="0" title="brightness" data-prop="brightness" prop="brightness"></range-input>
-		<range-input unit="%" range-input="true" min="0" max="200" value="0" title="contrast" data-prop="contrast" prop="contrast"></range-input>
-		<range-input unit="%" range-input="true" min="0" max="100" value="0" title="grayscale" data-prop="grayscale" prop="grayscale"></range-input>
-		<range-input unit="%" range-input="true" min="0" max="100" value="0" title="sepia" data-prop="sepia" prop="sepia"></range-input>
+		<range-input unit="px" min="0" max="100" value="0" title="blur" data-prop="blur" prop="blur"></range-input>
+	<range-input unit="%" min="0" max="200" value="0" title="brightness" data-prop="brightness" prop="brightness"></range-input>
+		<range-input unit="%" min="0" max="200" value="0" title="contrast" data-prop="contrast" prop="contrast"></range-input>
+		<range-input unit="%" min="0" max="100" value="0" title="grayscale" data-prop="grayscale" prop="grayscale"></range-input>
+		<range-input unit="%" min="0" max="100" value="0" title="sepia" data-prop="sepia" prop="sepia"></range-input>
 		<button class="resetFilters">&times;</button>
 	</div>
 	`,

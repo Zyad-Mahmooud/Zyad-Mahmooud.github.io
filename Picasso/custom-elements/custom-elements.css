@@ -1,63 +1,78 @@
-/* range */
-.range{
-    color: #E6E1DC;
-    background-color: #202020;
+/* إصلاح اصطفاف الحقول داخل الكارت الضيق مع الحفاظ على نفس الشكل والألوان والظلال */
+.range,
+.range:hover,
+.range:focus-within {
+    height: auto;
+    min-height: 70px;
+    padding-bottom: 10px;
+    box-sizing: border-box;
+}
+
+.range-settings {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px 0 10px;
+    box-sizing: border-box;
+}
+
+.range:hover .range-settings,
+.range:focus-within .range-settings {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.range input[placeholder="min"],
+.range input[placeholder="max"],
+.range input[placeholder="value"],
+.range .step,
+.range #step,
+.range .unit {
+    background: none;
+    border: none;
     -webkit-box-shadow: inset 0 0 10px black;
     -moz-box-shadow: inset 0 0 10px black;
     box-shadow: inset 0 0 10px black;
-    background-image: url(dottedBG.png);
-    border-radius: 15px;
-    height: 70px;
-    width: 49vw;
-    transition: 400ms;
-    position: relative;
+    border-radius: 5px;
+    box-sizing: border-box;
+    height: 30px;
+    margin: 0;
+    padding: 0 4px;
+    text-align: center;
+    min-width: 0;
 }
-.selectTag {
-    color: #E6E1DC;
-    background-color: #202020;
-    -webkit-box-shadow: inset 0 0 10px black;
-    -moz-box-shadow: inset 0 0 10px black;
-    box-shadow: inset 0 0 10px black;
-    background-image: url(dottedBG.png);
-    border-radius: 15px;
-    margin-bottom: 100px;
-    height: 50px;
-    width: 350px;
-    position: relative;
-    transition: 400ms;
+
+.range input[placeholder="min"],
+.range input[placeholder="max"],
+.range input[placeholder="value"],
+.range .step,
+.range #step {
+    color: white;
+    flex: 1 1 56px;
+    width: auto;
 }
-.range:hover {
-	height: 150px;
-	border-radius: 15px;
+
+.range .unit {
+    color: rgb(104, 104, 104);
+    flex: 0 0 54px;
+    width: auto;
+}
+.range input[placeholder="custom"],.range input[placeholder="value"] {
+  transition: 800ms;
 }
 .range input[placeholder="custom"] {
-  background: none;
+    background: none;
     color: white;
     border: none;
     -webkit-box-shadow: inset 0 0 10px black;
     -moz-box-shadow: inset 0 0 10px black;
     box-shadow: inset 0 0 10px black;
     border-radius: 5px;
-    margin-left: 10px;
-    margin-top: 10px;
-    width: 90%;
+    box-sizing: border-box;
+    width: 100%;
     height: 30px;
+    margin: 4px 0 0 0;
     text-align: center;
-}
-.range-settings {
-	display: none;
-}
-.range:hover .range-settings {
-	display: block;
-}
-.golden-text{
-    color: transparent;
-    background: linear-gradient(gold, orange, gold);
-    position: absolute;
-    height: 20px;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
 }
 .range input[type="range"]{
     -webkit-appearance:none;
@@ -79,42 +94,28 @@
     height: 20px;
     border-radius: 5px;
 }
-.range .range-title{
-    margin-top: 15px;
-    margin-left: 15px;
-}
-.range input[placeholder="min"],
-.range input[placeholder="max"],
-.range input[placeholder="value"]{
-    background: none;
-    color: white;
-    border: none;
+.selectTag {
+    color: #E6E1DC;
+    background-color: #202020;
     -webkit-box-shadow: inset 0 0 10px black;
     -moz-box-shadow: inset 0 0 10px black;
     box-shadow: inset 0 0 10px black;
-    border-radius: 5px;
-    margin-left: 10px;
-    width: 38px;
-    height: 30px;
-    text-align: center;
+    background-image: url(dottedBG.png);
+    border-radius: 15px;
+    margin-bottom: 100px;
+    height: 50px;
+    width: 350px;
+    position: relative;
+    transition: 400ms;
 }
-.range input[placeholder="max"],
-.range input[placeholder="value"]{
-    margin-left: 0px;
+.golden-text{
+    color: transparent;
+    background: linear-gradient(gold, orange, gold);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
-.range .unit{
-    background: none;
-    color: rgb(104,104,104);
-    border: none;
-    -webkit-box-shadow: inset 0 0 10px black;
-    -moz-box-shadow: inset 0 0 10px black;
-    box-shadow: inset 0 0 10px black;
-    border-radius: 5px;
-    margin-left: 0px;
-    width: 38px;
-    height: 30px;
-    text-align: center;
-}
+
 .b{
 	color: white;
 	margin-top: 5px;

@@ -1,6 +1,9 @@
 :root {
 	--w: clac(100vw);
 }
+* {
+  outline: none;
+}
 	body {
 		background: #1a1a1a;
 		flex-direction: column;

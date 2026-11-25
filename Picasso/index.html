@@ -6,13 +6,17 @@
     <title>Picasso UI</title>
   <link rel="stylesheet" href="UI.css" type="text/css" media="all" />
   <link rel="stylesheet" href="/lib/Style/items.css" type="text/css" media="all" />
-  <link rel="stylesheet" href="/lib/Style/Components.css" type="text/css" media="all" />
     <script type="module">
       import {parse,stringify} from "./addons/Selector Parser/Selector Parser.js";
       window.CSSSelector = {
         parse,
         stringify
       };
+      navigator.serviceWorker.register("./sw.js").then(function(res) {
+        console.log("serviceWorker [success]",res);
+      }).catch(function(err) {
+        console.log("serviceWorker [error]",err)
+      });
     </script>
   </head>
   <body>
@@ -26,7 +30,7 @@
     <input oninput="setViewport(this)" type="number" placeholder="height">
     </div>
     <div class="frame">
-    <iframe onload="initEntrypoint(this)" id="Preview" src="page.html" floating-ball="no"></iframe>
+    <iframe onload="initEntrypoint(this)" id="Preview" src="page.html" floating-ball="yes"></iframe>
     <!--
     floating-ball="yes" -> show floating ball
     floating-ball="no" -> hide floating ball
